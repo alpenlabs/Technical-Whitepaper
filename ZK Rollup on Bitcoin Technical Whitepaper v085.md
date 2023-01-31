@@ -684,7 +684,7 @@ Total size of the <state_diff>, hence, is: 6+25*D+12*T+(34*K+14)*S. The estimati
 
 With these estimates, we calculate the average size of state diff body per account to be 83.74 bytes. The analysis shows that there are roughly 0.787 unique account updates per transaction, as discussed in the next subsection, which means the average size of state diff body per transaction is ~66 bytes.
 
-We expect the overwhelming majority of the compressed block data to be the state diff body, and it is the component that has the most size per transaction. Therefore, for sake of simplification to the readers, we consider the worst case size by assuming 100% of the compressed data to contain state diff body. Therefore, for a block with 1000 transactions, for example, the size of compressed block data is 66 KB.
+We expect the overwhelming majority of the compressed block data to be the state diff body, and it is the component that has the most size per transaction. Therefore, for sake of simplification to the readers, we consider the worst case size by assuming 100% of the compressed data to contain state diff body. Therefore, for a block with 1000 transactions, the size of compressed block data is 66 KB.
 
 **Analysis — Transaction distribution in Ethereum**
 
