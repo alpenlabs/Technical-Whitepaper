@@ -43,7 +43,7 @@ With the industry adoption of and investments in the Lighting Network [24], we b
 Sidechains were introduced by Back et al. in 2014 with the goal of enabling new use cases of bitcoin currency without increasing complexity on the Bitcoin blockchain [25]. The core idea was to enable users to securely move bitcoins to and from another blockchain (sidechain). A sidechain can have a different set of features from Bitcoin like a more expressive smart contract language or a bigger block size; this allows a sidechain to support a broader set of applications. Figure 1 shows the general construction of a sidechain.
 
 <p align="center">
-<img src="figures/1.png" width="600"/>
+<img src="figures/1.png" width="700"/>
 </p>
 
 _Figure 1. A sidechain is a separate blockchain that has a different set of features and protocols from Bitcoin. Users lock bitcoins (BTC) on the mainchain — typically to a multisig address controlled by third parties — and an equivalent amount sidechain bitcoins (e.g. “S-BTC”) are minted on the sidechain. Users can then transact their S-BTC on the sidechain, secured by the sidechain’s own consensus protocol. When ready to withdraw their S-BTC funds back to Bitcoin, users can request a withdrawal. Once the withdrawal is approved by some trusted third parties, their S-BTC on the sidechain are burned and an equivalent amount of BTC are unlocked on the mainchain._
@@ -75,7 +75,7 @@ On Bitcoin, there has been relatively little progress on validity rollup designs
 In this section, we describe the components of a general validity rollup architecture. This general overview is provided as context to our specialized ZK Rollup design presented in Section 4. A validity rollup construction involves the interaction of two systems: one on the base layer (L1) and another one in an off-chain rollup layer (L2). We refer to the system on L1 as “L1 Rollup Protocol” or “L1 Protocol” and the off-chain system as “L2 Rollup System” or “L2 System”. Together, the L1 Protocol and L2 System make up the validity rollup, as shown in Figure 2.
 
 <p align="center">
-<img src="figures/2.png" width="600"/>
+<img src="figures/2.png" width="700"/>
 </p>
 
 _Figure 2: L1 Protocol facilitates the deposits into and withdrawals from the rollup. L2 System executes the off-chain transactions and combines them into a block. It then rolls them into a single L1 transaction and posts it to L1 along with the new L2 State Root of the L2 State Tree and the validity proof of the Rollup State transition from the last verified L2 State Root. L1 Protocol verifies the validity proof, updates the Rollup State in L1, and includes the verified transaction in the next L1 block._
@@ -107,7 +107,7 @@ A Merkle tree is a balanced binary tree in which each leaf node stores the hash 
 In the case of a rollup, each leaf stores account data for a user. Figure 3 shows a simple example with 4 users, where the account data is represented by a string of a user’s public key concatenated with the balance they hold in the rollup. More complex representations of account data are used in practice. Each account data A, B, C, and D is hashed as a Merkle leaf, and each parent node stores the hash of the concatenation of their children hashes. Thus, the root hash $H_{ABCD}$ is implicitly the hash of all user accounts in the tree, and used as a commitment to the state of the tree.
 
 <p align="center">
-<img src="figures/3.png" width="600"/>
+<img src="figures/3.png" width="700"/>
 </p>
 
 _Figure 3: A simple account Merkle tree of depth 2, with 4 user accounts. Each leaf is a hash of a user’s account data, and each internal node is a hash of concatenation of it’s two child hashes._
@@ -141,7 +141,7 @@ Merkle update is used in rollups to update the account’s balance, to add new a
 Generally, a validity rollup construct consists of 4 core modules: a Rollup Coordinator, a Transaction Executor, a Prover, and a Rollup Protocol. First three are a part of the L2 Rollup System while the Rollup Protocol is on the base layer. Some rollup designs include Transaction Executor within either Prover or Rollup Coordinator, but we show it as a separate module in this paper for clarity.
 
 <p align="center">
-<img src="figures/5.png" width="600"/>
+<img src="figures/5.png" width="700"/>
 </p>
 
 _Figure 5: System components in a general rollup architecture. A rollup coordinator batches transactions into a block, a Transaction Executor executes those transactions and passes the execution trace to a Prover which prepares a validity proof for the state transition. The rollup coordinator uses the validity proof and the compressed block data to construct a state update transaction on L1. The rollup protocol validates the state transition using the validity proof. It also processes the deposits and unilateral withdrawal transactions._
@@ -230,7 +230,7 @@ The Rollup Protocol needs to verify validity proofs. Currently there are no opco
 A Bitcoin transaction consists of one or more outputs and one or more inputs. The output of a transaction stores the value of bitcoins and includes a _locking script_ that specifies how the stored value can be spent. The input of a transaction, on the other hand, contains the _unlocking script_ which provides the necessary information, such as signatures, to spend the funds from a previous transaction’s unspent output (also called UTXO - Unspent Transaction Output).
 
 <p align="center">
-<img src="figures/6.png" width="600"/>
+<img src="figures/6.png" width="700"/>
 </p>
 
 _Figure 6: Each Bitcoin transaction input is linked with an output of a previous one forming a chain of transactions. Here, unlocking Script A contains the inputs that satisfy the scriptPubKey of the previous transaction A._
@@ -372,7 +372,7 @@ _Figure 11. A deposit transaction creates a new Rollup UTXO with the deposited f
 Funds are deposited to the Rollup UTXO sequentially, where each user spends from the latest Rollup UTXO to create an updated Rollup UTXO that includes their deposit. Relevant deposit data, including the public key identifying the user and deposit value, are hashed and committed to the rollup state while the deposit is still pending. We use a Merkle Mountain Range [74] to commit sequential deposit data into a single pending deposits hash within the rollup state. Figure 10 shows how the pending deposit hash and pending deposit count of the rollup state gets updated as the Merkle Mountain Range is constructed.
 
 <p align="center">
-<img src="figures/12.png" width="700"/>
+<img src="figures/12.png" width="800"/>
 </p>
 
 _Figure 12. A user creates a deposit transaction by spending from the deposit path of the Rollup UTXO. This deposit transaction creates a new Rollup UTXO with an updated Rollup State commitment and the deposited amount added to the UTXO value. Pending Deposit Hash and Count are updated in the Rollup State as shown in the figure. The Pending Deposit Hash is computed by taking the hash of the concatenation of the Merkle Range roots from left to right. After the deposits are processed in L2 and the L2 state change containing the pending deposits is settled on L1 with an update transaction, then the pending deposits data is reset._
