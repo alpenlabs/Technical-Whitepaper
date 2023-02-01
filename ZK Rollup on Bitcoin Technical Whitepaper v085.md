@@ -108,8 +108,6 @@ _Figure 3: A simple account Merkle tree of depth 2, with 4 user accounts. Each l
 
 In a rollup, the entire accounts tree is stored in the L2 System whereas just the Merkle root is stored in L1 protocol as a commitment to the latest state of the tree. This approach is preferred as it is typically expensive to store data on the base layer. With just the root hash, L1 contract is able to verify the existence of account data provided by any user, given a Merkle proof for the account.
 
-There are different types of Merkle trees. Two notable ones are Sparse Merkle Tree (SMT) and Merkle Mountain Range (MMR). SMT is a fixed-sized Merkle tree in which each leaf is initialized with a fixed initial value, usually the hash of zeros. When data becomes available, it can be hashed and placed at any leaf. On the other hand, MMR is dynamically constructed as data becomes available, so a new leaf always gets constructed adjacent to the previous leaf. Each variant has different properties and can be chosen according to the design requirements.
-
 ### 3.2.2 Merkle Proof
 
 Merkle proof is a way to prove the existence of a leaf in a Merkle tree without revealing or searching for the entire tree. Specifically, a Merkle proof is a list of hashes of appropriate nodes in the tree such that the root hash can be constructed from that list of hashes along with the leaf data. Such hashes are also called co-hashes.
@@ -158,7 +156,7 @@ The Transaction Executor receives the proposed block from the Coordinator, execu
 
 ## 3.4 Rollup Assumptions & User Guarantees
 
-We claim that a rollup can be trustless” and can “fully inherit” the double spend security from base layer. We will formalize these descriptions as a set of assumptions, which if held as true, leads to a set of guarantees that a rollup can verifiably provide.
+We claim that a rollup can be "trustless” and can “fully inherit” the double spend security from base layer. We will formalize these descriptions as a set of assumptions, which if held as true, leads to a set of guarantees that a rollup can verifiably provide.
 
 ### 3.4.1 Assumptions
 
@@ -217,7 +215,7 @@ The Rollup Protocol needs to verify validity proofs. Currently there are no opco
 
 ## 4.2 Bitcoin Rollup Protocol
 
-### 4.2.1 Review: Bitcoin Transactions
+### 4.2.1 Background: Bitcoin Transactions
 
 A Bitcoin transaction consists of one or more outputs and one or more inputs. The output of a transaction stores the value of bitcoins and includes a _locking script_ that specifies how the stored value can be spent. The input of a transaction, on the other hand, contains the _unlocking script_ which provides the necessary information, such as signatures, to spend the funds from a previous transaction’s unspent output (also called UTXO - Unspent Transaction Output).
 
