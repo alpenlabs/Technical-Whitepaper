@@ -1270,11 +1270,17 @@ Our ZK Rollup is secured by a rollup protocol on Bitcoin implemented as a smart 
 [77] [https://github.com/ElementsProject/elements/blob/master/doc/tapscript_opcodes.md](https://github.com/ElementsProject/elements/blob/master/doc/tapscript_opcodes.md)
 
 [78] [https://eips.ethereum.org/EIPS/eip-4337](https://eips.ethereum.org/EIPS/eip-4337)
+
 [79] [https://docs.starknet.io/documentation/architecture_and_concepts/Account_Abs
 traction/introduction/](https://docs.starknet.io/documentation/architecture_and_concepts/Account_Abs
 traction/introduction/)
+
 [80] [https://arxiv.org/pdf/2108.05513.pdfïijĽ](https://arxiv.org/pdf/2108.05513.pdfïijĽ)
+
 [81] [https://www.ripublication.com/ijaer17/ijaerv12n19_128.pdf](https://www.ripublication.com/ijaer17/ijaerv12n19_128.pdf)
+
 [82] [https://gz.blockchair.com/ethereum/transactions/](https://gz.blockchair.com/ethereum/transactions/)
+
 [83] [https://eprint.iacr.org/2016/263.pdf](https://eprint.iacr.org/2016/263.pdf)
+
 [84] [https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki](https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki)
