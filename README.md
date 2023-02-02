@@ -1,6 +1,6 @@
 # ZK Rollup on Bitcoin: Technical Whitepaper v0.8.5
 
-# 1 Introduction
+# **1 Introduction**
 
 Satoshi Nakamoto’s discovery of how to prevent double-spending without a trusted third party gave birth to Bitcoin [1]. Implemented as a peer-to-peer network on the Internet, Bitcoin is a global, decentralized settlement system with a native digital currency. After widespread adoption in the subsequent years, bitcoins are the most valuable digital currency by global market cap.
 
@@ -20,11 +20,11 @@ Our proposed Layer 2 is a ZK Rollup System, which uses proofs of computational i
 
 In the next section, we discuss other Bitcoin infrastructure work also aimed at enabling more decentralized use cases for bitcoins, including Lightning Network and sidechains. We also discuss existing validity rollups and optimistic rollups on other blockchain ecosystem. Section 3 provides a general introduction to validity rollup architectures. Section 4 covers our major contribution in this paper, which is a technical design of our proposed ZK Rollup System on Bitcoin. In Section 5, we provide a technical overview of zero knowledge proofs and describe properties of a proof system employed in our ZK Rollup design for Bitcoin compatibility.
 
-# 2 Related Work
+# **2 Related Work**
 
 In this section, we describe several existing work related to scaling and extending the capabilities of Bitcoin. We discuss their goals, technical constructions, practical tradeoffs, and current limitations. Additionally, we provide a general description of rollups and provide an overview of existing work on rollups in other blockchain ecosystems.
 
-## 2.1 Lightning Network
+## **2.1 Lightning Network**
 
 Lightning Network [18] is a payment layer on Bitcoin proposed in 2015 that enables faster and cheaper bitcoin transactions on a network of interconnected, bidirectional payment channels. As a Layer 2 protocol, Lightning Network aims to improve transaction throughput and latency for peer-to-peer payments without introducing additional trust assumptions.
 
@@ -38,7 +38,7 @@ Beyond these inherent limitations, there are also salient implementation issues 
 
 With the industry adoption of and investments in the Lighting Network [24], we believe these implementation issues are resolvable over time. However, given the recurring operational and capital overhead of maintaining a self-custodial node inherent to the Lightning architecture, we believe most users will rely on a trusted third party for Lightning payment processing.
 
-## 2.2 Sidechains
+## **2.2 Sidechains**
 
 Sidechains were introduced by Back et al. in 2014 with the goal of enabling new use cases of bitcoin currency without increasing complexity on the Bitcoin blockchain [25]. The core idea was to enable users to securely move bitcoins to and from another blockchain (sidechain). A sidechain can have a different set of features from Bitcoin like a more expressive smart contract language or a bigger block size; this allows a sidechain to support a broader set of applications. Figure 1 shows the general construction of a sidechain.
 
@@ -56,13 +56,13 @@ Wrapped bitcoins like WBTC [11] and SoBTC [32] follow a similar 2-way peg constr
 
 Bitcoin sidechains today require a trusted and mostly permissioned two-way peg, leading to centralized points of failure and user risks. Additionally, sidechains introduce additional trust requirements for the user with their consensus protocols. While the mechanics to enforce the two-way peg and achieve consensus on the sidechain have become more secure over time, holding assets on any Bitcoin sidechain today still requires significant trust assumptions beyond Bitcoin’s consensus protocol.
 
-## 2.3 Rollups
+## **2.3 Rollups**
 
 Rollups are scaling solutions that involve processing a batch of transactions off-chain and settling the batch as a single transaction on-chain. Rollups enable validators on the blockchain to efficiently verify the validity of multiple transactions without having to execute them on-chain. This reduces on-chain computation overhead and storage footprint for transactions, leading to better throughput and lower costs. Beyond the scalability benefits, rollups can also extend the functionality of a blockchain because off-chain execution environments can process more complex transactions.
 
 The off-chain rollup system can be a Layer 2 (L2) blockchain with block producers that verify transactions and broadcast state changes to the L1 blockchain. Each L2 block is settled only once the state transition is confirmed to be valid on the L1 blockchain. This construction enables the L2 blockchain to use L1 consensus for both securing the two-way bridge between L1 and L2 and confirming new L2 blocks. There are different techniques to ensure the validity of L2 state transitions in the L1 rollup protocol, resulting in two types of rollups: _optimistic_ rollups and _validity_ rollups.
 
-In an optimistic rollup, L2 block producers broadcast transaction data to an on-chain rollup contract and stake some funds to vouch for the validity of those off-chain transactions. These off-chain transactions are assumed to be correct unless proven otherwise. Anyone can submit a fraud proof within a fixed challenge period (typically one week) to report an invalid transaction. Invalid transactions can result in the the block producer losing their stake, therefore creating economic incentives to submit correctly verified transaction data. Early ideas of optimistic rollups go back to 2014 with Vitalik Buterin’s Shadow Chain [35], but today there are several active optimistic rollup L2 systems like Arbitrum [36] and Optimism 37] deployed on Ethereum. The main drawbacks to this type of rollup are long settlement times for L2 state transitions and persistent overhead on users to audit and potentially challenge the validity of off-chain transactions.
+In an optimistic rollup, L2 block producers broadcast transaction data to an on-chain rollup contract and stake some funds to vouch for the validity of those off-chain transactions. These off-chain transactions are assumed to be correct unless proven otherwise. Anyone can submit a fraud proof within a fixed challenge period (typically one week) to report an invalid transaction. Invalid transactions can result in the block producer losing their stake, therefore creating economic incentives to submit correctly verified transaction data. Early ideas of optimistic rollups go back to 2014 with Vitalik Buterin’s Shadow Chain [35], but today there are several active optimistic rollup L2 systems like Arbitrum [36] and Optimism 37] deployed on Ethereum. The main drawbacks to this type of rollup are long settlement times for L2 state transitions and persistent overhead on users to audit and potentially challenge the validity of off-chain transactions.
 
 Unlike optimistic rollup which is secured by cryptoeconomic guarantees, a validity rollup uses a formal system of cryptographic proofs to secure off-chain transactions. Validity rollup construction requires L2 block producers to provide a validity proof attesting to the correctness of transaction execution and the resulting state updates. Validity proof, which is a proof of computational integrity, is provided along with a compressed summary of L2 state changes to an L1 smart contract for verification. This enables the L2 transactions to be secured by L1 consensus protocol without introducing any L2 transaction execution complexity to L1. Deposits to and withdrawals from L2 are also secured by L1 validators, enabling a trustless bridge between the two layers.
 
@@ -70,7 +70,7 @@ The first construction of a validity rollup was proposed in 2019 by Barry Whiteh
 
 On Bitcoin, there has been relatively little progress on validity rollup designs, partly because L2 cannot be implemented without changes to the base layer. John Light created a comprehensive report in 2022 that examined the potential for validity rollups on Bitcoin [43]. He concluded that validity rollups would be a great fit for scaling and extending the capabilities of Bitcoin in a way that could be consistent with the community’s core values. Earlier that year, Trey del Bonis provided one of the first technical proposals for building a validity rollup on Bitcoin [44]. Our work builds on both of their prior work, and shares the conclusion that validity rollups could significantly improve Bitcoin infrastructure without compromising security and decentralization.
 
-# 3 Introduction to Validity Rollups
+# **3 Introduction to Validity Rollups**
 
 In this section, we describe the components of a general validity rollup architecture. This general overview is provided as context to our specialized ZK Rollup design presented in Section 4. A validity rollup construction involves the interaction of two systems: one on the base layer (L1) and another one in an off-chain rollup layer (L2). We refer to the system on L1 as “L1 Rollup Protocol” or “L1 Protocol” and the off-chain system as “L2 Rollup System” or “L2 System”. Together, the L1 Protocol and L2 System make up the validity rollup, as shown in Figure 2.
 
@@ -80,7 +80,7 @@ In this section, we describe the components of a general validity rollup archite
 
 _Figure 2: L1 Protocol facilitates the deposits into and withdrawals from the rollup. L2 System executes the off-chain transactions and combines them into a block. It then rolls them into a single L1 transaction and posts it to L1 along with the new L2 State Root of the L2 State Tree and the validity proof of the Rollup State transition from the last verified L2 State Root. L1 Protocol verifies the validity proof, updates the Rollup State in L1, and includes the verified transaction in the next L1 block._
 
-## 3.1 Overview
+## **3.1 Overview**
 
 An account-based validity rollup stores balances and relevant metadata in unique user accounts in the L2 System. Each account can be represented by a leaf in a Merkle Tree, as described in Section 3.2.1. Since the collection of all user accounts constitutes the state of the L2 System, the Merkle Tree of accounts is known as the _L2 State Tree_. The root of this tree is the _L2 State Root_, which is stored in L1 Protocol as a state commitment. After a batch of transactions is processed by the L2 System, the L2 State Tree is updated and a new L2 State Root is proposed to the L1 Protocol along with a cryptographic proof attesting to the validity of the state transition from the old L2 State Root to the new L2 State Root.
 
@@ -90,17 +90,17 @@ To deposit funds into a rollup, users interact with L1 Rollup Protocol to create
 
 With an account on the L2 System, users can transfer their funds to other L2 accounts or withdraw back to any address on L1, though most transactions processed by the L2 System are transactions between L2 accounts. The L2 System's transaction execution environment can have a different set of features and support new types of transactions that are not available on L1.
 
-To withdraw from the rollup, users typically submit a withdrawal transaction to the L2 System, which removes the desired funds from their accounts on L2. These withdrawal transactions are included in the next state update committed to the L1 Protocol. The L1 Protocol verifies the validity of the withdrawal transactions and approves the withdrawals of funds to appropriate addresses in L1.
+To withdraw from the rollup, users typically submit a withdrawal transaction to the L2 System, which removes the desired funds from their accounts on L2. These withdrawal transactions are included in the next state update committment to the L1 Protocol. The L1 Protocol verifies the validity of the withdrawal transactions and approves the withdrawals of funds to appropriate addresses in L1.
 
 If the L2 System censors any withdrawals from the rollup, users can unilaterally withdraw their rollup funds by only interacting with the L1 Protocol. The rollup has mechanisms to ensure that the user has the necessary funds in the latest confirmed L2 State Tree to withdraw. Furthermore, there is sufficient account data available on L1 for users to be able to construct the latest confirmed L2 State Tree without the cooperation of the L2 System.
 
 The L1 Protocol often has additional rules to handle cases when the L2 System fails completely, does not cooperate, or does not submit any updates for a prolonged period of time. In addition, it may have rules for updating the protocol itself, or any other rules specific to the application.
 
-## 3.2 Accounts and Balances Representation
+## **3.2 Accounts and Balances Representation**
 
 A Merkle tree data structure is often employed to store account data in an L2 Rollup System. This section describes the processes for storing, updating, and creating proof of account data in a Merkle tree.
 
-### 3.2.1 Merkle Tree
+### **3.2.1 Merkle Tree**
 
 A Merkle tree is a balanced binary tree in which each leaf node stores the hash of the underlying data and each inner node up to the root stores the hash of a concatenated string of its children’s hashes. The Merkle root, in turn, is a hash that represents an accumulated hash of the entire dataset.
 
@@ -114,7 +114,7 @@ _Figure 3: A simple account Merkle tree of depth 2, with 4 user accounts. Each l
 
 In a rollup, the entire accounts tree is stored in the L2 System whereas just the Merkle root is stored in L1 protocol as a commitment to the latest state of the tree. This approach is preferred as it is typically expensive to store data on the base layer. With just the root hash, L1 contract is able to verify the existence of account data provided by any user, given a Merkle proof for the account.
 
-### 3.2.2 Merkle Proof
+### **3.2.2 Merkle Proof**
 
 Merkle proof is a way to prove the existence of a leaf in a Merkle tree without revealing or searching for the entire tree. Specifically, a Merkle proof is a list of hashes of appropriate nodes in the tree such that the root hash can be constructed from that list of hashes along with the leaf data. Such hashes are also called co-hashes.
 
@@ -130,13 +130,13 @@ For a Merkle tree with N leaves, the size of the proof is proportional to the he
 
 In a rollup, Merkle proofs are usually presented by the user to L1 protocol during unilateral withdrawals or deposits to prove the existence or non-existence of their accounts respectively. L1 protocol constructs a root from the account data and the proof provided by the user, and compares it to the root stored in the protocol to check the validity of the proof.
 
-### 3.2.3 Merkle Update
+### **3.2.3 Merkle Update**
 
 A Merkle update is an update to a leaf in a Merkle tree. To update the data in a leaf, one can prepare a new leaf with the updated information and hash it. Then, using the hash of this new leaf and the list of co-hashes (similar to the Merkle proof list), one can progressively update the inner nodes and finally the Merkle root. The runtime complexity of a Merkle update is $O(log_2N)$ for a tree with N leaves, same as that of a Merkle proof verification.
 
 Merkle update is used in rollups to update the account’s balance, to add new accounts, and to remove existing accounts. Therefore, Merkle update is an operation performed during the execution of all transactions in a rollup.
 
-## 3.3 System Components
+## **3.3 System Components**
 
 Generally, a validity rollup construct consists of 4 core modules: a Rollup Coordinator, a Transaction Executor, a Prover, and a Rollup Protocol. The first three are part of the L2 Rollup System while the Rollup Protocol is on the base layer. Some rollup designs include Transaction Executor within either Prover or Rollup Coordinator, but we show it as a separate module in this paper for clarity.
 
@@ -146,7 +146,7 @@ Generally, a validity rollup construct consists of 4 core modules: a Rollup Coor
 
 _Figure 5: System components in a general rollup architecture. A rollup coordinator batches transactions into a block, a Transaction Executor executes those transactions and passes the execution trace to a Prover which prepares a validity proof for the state transition. The Rollup Coordinator uses the validity proof and the compressed block data to construct a state update transaction on L1. The rollup protocol validates the state transition using the validity proof. It also processes the deposits and unilateral withdrawal transactions._
 
-### 3.3.1 L1 Rollup Protocol
+### **3.3.1 L1 Rollup Protocol**
 
 L1 Rollup Protocol is the system on the base layer (L1) in a rollup. It handles at least three types of transactions: _deposit_, _unilateral withdrawal_, and _L2 state update_. Deposit and unilateral withdrawal are submitted by the users while the L2 state update is submitted by the L2 Rollup System.
 
@@ -154,7 +154,7 @@ When a user submits a deposit transaction, the rollup protocol locks the user fu
 
 If a user wants to unilaterally withdraw their rollup funds without interacting with the L2 Rollup System, they submit a unilateral withdrawal transaction. This requires a user to provide a proof of their account and balance to the rollup protocol, often using a Merkle proof. The L1 Rollup Protocol verifies the proof against the latest state commitment of the L2 State Tree stored in L1 and approves the withdrawal.
 
-The L2 Rollup System submits a state update transaction to propose to L1 Rollup Protocol a new state commitment obtained after executing a batch of transactions. The proposed state commitment is accompanied by the validity proof of the valid state transition from the last verified commitment to the new proposed commitment. The rollup protocol verifies the validity proof, validates that the new (pending) deposits being tracked by the L1 Rollup Protocol are included in this proposed batch, ensures that the new withdrawals in the batch are being directed to the authorized users, and updates the state commitment to the new proposed one. This state update transaction is at the heart of a validity rollup construction because it is the construct that allows large number of user transactions to be “rolled up” into one, saving precious computational resources of full nodes on the base chain.
+The L2 Rollup System submits a state update transaction to propose to L1 Rollup Protocol a new state commitment obtained after executing a batch of transactions. The proposed state commitment is accompanied by the validity proof of the valid state transition from the last verified commitment to the new proposed commitment. The rollup protocol verifies the validity proof, validates that the new (pending) deposits being tracked by the L1 Rollup Protocol are included in this proposed batch, ensures that the new withdrawals in the batch are being directed to the authorized users, and updates the state commitment to the new proposed one. This state update transaction is at the heart of a validity rollup construction because it is the construct that allows large number of user transactions to be “rolled up” into one, saving computational resources of validators on the base chain.
 
 ### **3.3.2 L2 Rollup System**
 
@@ -162,13 +162,13 @@ An L2 Rollup System is typically a blockchain system that accepts L2 transaction
 
 There are usually three components that handle the above functions: Rollup Coordinator, Transaction Executor and Prover. A Rollup Coordinator interfaces with the L2 users to accept transaction requests. It then aggregates L2 transactions into a new pending block while validating them against L2 validation rules. This includes ensuring that the authorized user initiated the transaction, more funds is not spent than what is available in a user’s account, and so on. Once the block passes these validation steps, the Rollup Coordinator sends the pending block and the L2 State Tree to the Transaction Executor.
 
-The Transaction Executor receives the pending block from the Coordinator, executes the transaction in an execution environment (such as zk-VM) and generates an execution trace. The Transaction Executor passes the execution trace of the new block to the third component, the Prover. Prover generates a validity proof using an agreed upon proof system. Once the proof is generated, the Rollup Coordinator receives the validity proof and sends it to the Rollup Protocol in L1, along with L2 block data and the new state root, as a single state update transaction.
+The Transaction Executor receives the pending block from the Coordinator, executes the transaction in an execution environment (such as zk-VM) and generates an execution trace. The Transaction Executor passes the execution trace of the pending block to the third component, the Prover. Prover generates a validity proof using an agreed upon proof system. Once the proof is generated, the Rollup Coordinator receives the validity proof and sends it to the Rollup Protocol in L1, along with the pending block data and the new state root, as a single state update transaction.
 
-## 3.4 Rollup Assumptions & User Guarantees
+## **3.4 Rollup Assumptions & User Guarantees**
 
 We claim that a rollup can be "trustless” and can “fully inherit” the double spend security from base layer. We will formalize these descriptions as a set of assumptions, which if held as true, leads to a set of guarantees that a rollup can verifiably provide.
 
-### 3.4.1 Assumptions
+### **3.4.1 Assumptions**
 
 1. **L1 blockchain prevents double spending.**
    - The cryptographic assumptions underlying this will depend on the implementation of the L1 blockchain. For Bitcoin, this assumption requires the following to all be true: 1) hardness of the `secp256k1` elliptic curve discrete logarithm problem, 2) collision resistance of SHA-256 hash function, and 3) puzzle-friendliness of SHA-256 hash function.
@@ -181,7 +181,7 @@ We claim that a rollup can be "trustless” and can “fully inherit” the doub
 
 Additional optional assumptions may be required depending on the proof scheme used for validity proofs. For example, zk-SNARKs may require additional assumptions around new cryptographic primitives and a trusted setup. Our proposed Bitcoin design uses FRI-based proof systems that do not require additional cryptographic assumptions and do not require a trusted setup.
 
-### 3.4.2 User Guarantees
+### **3.4.2 User Guarantees**
 
 A properly implemented L2 Rollup System, together with the L1 Rollup Protocol, can provide the following verifiable guarantees using only the set of assumptions defined in Section 3.4.1.
 
@@ -193,23 +193,23 @@ A properly implemented L2 Rollup System, together with the L1 Rollup Protocol, c
 
 A Rollup System can provide a verifiable guarantee to a user that they can have full ownership, control, and the ability to unilaterally withdraw funds they deposit to the Rollup System. Importantly, these guarantees can be provided without any additional assumptions beyond the ones already required to transact securely on L1. Thus, we conclude that an L2 Rollup System can be trustless and can inherit the security of the L1 blockchain without requiring L1 to execute any L2 transactions.
 
-# 4 ZK Rollup on Bitcoin
+# **4 ZK Rollup on Bitcoin**
 
 In this section, we present our proposed ZK Rollup design for Bitcoin. Though a validity rollup is often referred to as a ZK Rollup, this is often a misnomer as zero-knowledge is a rigorous mathematical property of a proof or an argument that may not be guaranteed by validity proofs used in a rollup construction. We use “ZK Rollup" in our paper as it is used colloquially in industry, defining the zero-knowledge to be the property that the proof of computation integrity can be verified without knowledge of the private inputs used in the computation.
-We begin by addressing the technical challenges of implementing a validity rollup on the Bitcoin blockchain, followed by the details of our L1 (Bitcoin) Rollup Protocol and L2 Rollup System designs. Since there are existing L2 Rollup Systems implemented on other blockchains, our primary focus is to provide a detailed design of the Bitcoin Rollup Protocol, while presenting a high level design of an L2 Rollup System that allows smart contract capabilities on top of the Rollup Protocol. Finally, this section brings together all the components of our design from a bird’s eye view and provides a scalability analysis to demonstrate the potential throughput improvements for bitcoin transactions with our proposed design.
+We begin by addressing the technical challenges of implementing a validity rollup on the Bitcoin blockchain, followed by the details of our L1 (Bitcoin) Rollup Protocol and L2 Rollup System designs. Since there are existing L2 Rollup Systems implemented on other blockchains, our primary focus is to provide a detailed design of the Bitcoin Rollup Protocol, while presenting a high level design of the L2 Rollup System that allows smart contract capabilities on top of the L1 Rollup Protocol. Finally, this section brings together all the components of our design from a bird’s eye view and provides a scalability analysis to demonstrate the potential throughput improvements for bitcoin transactions with our proposed design.
 
-## 4.1 Technical Challenges
+## **4.1 Technical Challenges**
 
 In our design, we implement the L1 Rollup Protocol as a bitcoin UTXO that contains a rollup contract, henceforth referred to as the “Rollup UTXO”. When designing the rollup contract, we face several challenges resulting from Bitcoin’s constrained execution environment and the restricted functionality of its smart contract programming language, Script. We use various strategies to counteract some of these challenges, but others require changes to Bitcoin core. In the meantime, we plan to implement the first version of our proposed design using the Elements framework [75] which already addresses the majority of these limitations.
 
 **No persistent storage limits Rollup State storage and propagation.**
-Bitcoin's execution environment doesn't allow persistent storage across transaction executions which prevents the Rollup Protocol from storing or updating the Rollup State. In our design, we have leveraged Bitcoin Taproot upgrade [72] to store state in a novel way which is described in detail in Section 4.2.3. Furthermore, we require that each transaction spending from the Rollup UTXO must include the Rollup State as an input to the rollup contract, and the contract verifies the validity of the input before execution. This mitigates the need for a storage feature within the execution environment because the updated state is passed by the transaction creator with every new transaction. The implementation of this solution is described in detail in Sections 4.2.4, 4.2.5, and 4.3.6.
+Bitcoin's execution environment doesn't allow persistent storage across transaction executions which prevents the Rollup Protocol from storing or updating the Rollup State. In our design, we have leveraged Bitcoin Taproot upgrade [72] to store state in a novel way which is described in detail in Section 4.2.3. Furthermore, we require that each transaction spending from the Rollup UTXO must include the Rollup State as an input to the rollup contract, and the contract verifies the validity of the input before execution. This mitigates the need for a storage feature within the execution environment because the updated state is passed by the transaction creator with every new transaction. The implementation of this solution is described in detail in Sections 4.2.4, 4.2.5, and 4.2.6.
 
 **Limited programability constrains smart contract functions.**
 Script includes a predefined set of instructions called opcodes that are executed within a constrained environment. The program is limited to what is pushed to the stack as inputs when executing the opcodes, and lacks control structures such as loops. Not only does this increase the time for development and testing of smart contracts, but it also makes it impossible to replicate arbitrary logic. For our design, we were successfully able to translate complex Rollup Protocol logic into a construction that can be implemented using opcodes, as described in Sections 4.2.4, 4.2.5, and 4.2.6. We also make use of a few additional opcodes implemented in Elements [77] to reduce code complexity (even though many of these additional opcodes are optional for our design). The Elements opcodes we use are discussed in Section 4.2.2.
 
 **Bitcoin contracts cannot communicate with external systems.**
-A Bitcoin contract cannot communicate with components outside of Bitcoin, such as by emitting events. This is a limitation because an L2 rollup system needs to know when a user initiates a rollup deposit or a unilateral withdrawal in L1 so that it can update appropriate accounts in L2. We address this by adding a component that monitors the Bitcoin mempool for any relevant events. This is described in Section 4.3.2.1.
+A Bitcoin contract cannot communicate with components outside of Bitcoin, such as by emitting events. This is a limitation because the L2 Rollup System needs to know when a user initiates a rollup deposit or a unilateral withdrawal in L1 so that it can update appropriate accounts in L2. We address this by adding a component that monitors the Bitcoin Mempool for any relevant events. This is described in Section 4.3.2.1.
 
 **Contracts cannot initiate transactions.**
 Contracts written in Script cannot independently manage funds stored within a UTXO or initiate payments to other owners. Because of this, Bitcoin-specific designs are necessary to handle cases such as entry into and exits from the rollup. In our design, the contract doesn’t need to initiate any transactions. All the transactions are initiated by either a user or the L2 Rollup System, and the script merely validates the transaction details.
@@ -223,9 +223,9 @@ Bitcoin lacks “introspective” opcodes, or the ability to read data from the 
 **Validity proof verification is not available as an opcode.**
 The Rollup Protocol needs to verify validity proofs. Currently there are no opcodes that can do so in Bitcoin, and this is a major challenge to implementing a rollup on Bitcoin. We propose adding a new opcode to Bitcoin that can verify validity proofs and use it in our design. We discuss this opcode in Sections 4.2.2 and 4.2.7.
 
-## 4.2 Bitcoin Rollup Protocol
+## **4.2 Bitcoin Rollup Protocol**
 
-### 4.2.1 Background: Bitcoin Transactions
+### **4.2.1 Background: Bitcoin Transactions**
 
 A Bitcoin transaction consists of one or more outputs and one or more inputs. The output of a transaction stores the value of bitcoins and includes a _locking script_ that specifies how the stored value can be spent. The input of a transaction, on the other hand, contains the _unlocking script_ which provides the necessary information, such as signatures, to spend the funds from a previous transaction’s unspent output (also called UTXO - Unspent Transaction Output).
 
@@ -250,7 +250,7 @@ The third type of scriptPubKey in SegWit is Pay-to-Taproot (P2TR), shown in Figu
 
 ### **4.2.2 Special Opcodes**
 
-Bitcoin has a limited set of opcodes to program script conditions to spend UTXOs. To implement our L1 Rollup Protocol, we need several additional opcodes for two reasons: we need to enforce a recursive covenant and we need to be able to efficiently verify a validity proof. We can enforce a recursive covenant using a set of introspective opcodes already implemented on Elements [58]. We can efficiently verify validity proofs using a new opcode. Since verification logic is dependent on the proof system used in the rollup, we have proposed an opcode for a FRI-based proof system (often referred to as STARK). Section 5.3 explains our rationale for picking FRI-based proof system in our first design iteration.
+Bitcoin has a limited set of opcodes to program script conditions to spend UTXOs. To implement our L1 Rollup Protocol, we need several additional opcodes for two reasons: we need to enforce a recursive covenant and we need to be able to efficiently verify a validity proof. We can enforce a recursive covenant using a set of introspective opcodes already implemented on Elements [58]. We can efficiently verify validity proofs using a new opcode. Since verification logic is dependent on the proof system used in the rollup, we have proposed an opcode for a FRI-based proof system (e.g. STARK). Section 5.3 explains our rationale for picking FRI-based proof system in our first design iteration.
 
 In addition to these core opcodes, there are several additional opcodes employed in our design that significantly reduce the complexity of our rollup scripts, but these are optional and not strictly required. These optional opcodes are also already implemented on Elements.
 
@@ -344,10 +344,10 @@ The Script Tree root must be constant for every Rollup UTXO to ensure no scripts
 Internal key of the Rollup UTXO represents a commitment to the Rollup State. Script validation rules described in BIP 341 [72] require the internal key to correspond to a point on the `secp256k1` curve, but our construction requires the internal key to be unspendable. To address these constraints, we must use an internal key that corresponds to a point on the curve with a provably unknown private key. We use the following equation to derive the internal key.
 
 $$
-P = H + \textrm{int}(\textrm{hash}_{}(rollup\_state))*G
+P = H + \textrm{int}(\textrm{hash}_{}(rollup\_state))\times G
 $$
 
-Here, $P$ is the Taproot internal key point, $H$ is a point with an unknown discrete logarithm, rollup_state is a bytestring of the _rollup state_ that changes in every new Rollup UTXO, and $G$ is the generator point. We can choose $H=(x,y)$, where $x$ is hash of the standard uncompressed encoding of the secp256k1 base point $G$, as suggested in BIP 341. Since $\textrm{int}(\textrm{hash}(H\  || \ \textrm{hash}(rollup\_state)))$ is sufficiently random and each TapLeaf script enforces that the internal key for a new Rollup UTXO is computed exactly this way, it can be concluded that $P$ does not have a known discrete logarithm. We use the X-coordinate of $P$ as our internal public key, which serves as the commitment to the _rollup state_.
+Here, $P$ is the Taproot internal key point, $H$ is a point with an unknown discrete logarithm, rollup_state is a bytestring of the _rollup state_ that changes in every new Rollup UTXO, and $G$ is the generator point. We can choose $H=(x,y)$, where $x$ is hash of the standard uncompressed encoding of the `secp256k1` base point $G$, as suggested in BIP 341. Since $\textrm{int}(\textrm{hash}(H\  || \ \textrm{hash}(rollup\_state)))$ is sufficiently random and each TapLeaf script enforces that the internal key for a new Rollup UTXO is computed exactly this way, it can be concluded that $P$ does not have a known discrete logarithm. We use the X-coordinate of $P$ as our internal public key, which serves as the commitment to the _rollup state_.
 
 The L1 Rollup protocol handles three types of transactions: deposit, L2 state update and unilateral withdrawal. In the following sections, we discuss in details the construct of these transactions and the associated scripts in the rollup contract.
 
@@ -355,7 +355,7 @@ The L1 Rollup protocol handles three types of transactions: deposit, L2 state up
 
 Users can deposit funds into the L2 Rollup System by creating a deposit transaction that spends from the Rollup UTXO. The transaction structure of a deposit transaction is shown in Figure 11.
 
-Deposit transaction updates the pending deposit data in the Rollup State and commits this within the internal key of the P2TR scriptPubKey for the new Rollup UTXO. The L2 Rollup System detects the pending deposit transaction in the L1 mempool and updates the L2 state to include this deposit. The new L2 State Root, containing the deposited funds in the appropriate L2 account, is settled with a state update transaction. Once the state update transaction is confirmed, the deposit is no longer pending and thus will not be tracked in the Rollup State.
+Deposit transaction updates the pending deposit data in the Rollup State and commits this within the internal key of the P2TR scriptPubKey for the new Rollup UTXO. The L2 Rollup System detects the pending deposit transaction in the L1 Mempool and updates the L2 state to include this deposit. The new L2 State Root, containing the deposited funds in the appropriate L2 account, is settled with a state update transaction. Once the state update transaction is confirmed, the deposit is no longer pending and thus will not be tracked in the Rollup State.
 
 <p align="center">
 <img src="figures/11.png" width="600"/>
@@ -363,13 +363,13 @@ Deposit transaction updates the pending deposit data in the Rollup State and com
 
 _Figure 11. A deposit transaction creates a new Rollup UTXO with the deposited funds added to the rollup value and a Refund UTXO for the user. A user may spend multiple User Fund UTXOs, all spendable by the user, totaling the deposit amount. The witness includes the deposit script inputs, deposit script, and the control block proving the existence of the Deposit TapLeaf._
 
-Funds are deposited to the Rollup UTXO sequentially, where each user spends from the latest Rollup UTXO to create an updated Rollup UTXO that includes their deposit. Relevant deposit data, including the public key identifying the user and deposit value, are hashed and committed to the Rollup State while the deposit is still pending. We use a Merkle Mountain Range [74] to commit sequential deposit data into a single pending deposits hash within the Rollup State. Figure 12 shows how the pending deposit hash and pending deposit count of the Rollup State gets updated as we construct the Merkle Mountain Range.
+Funds are deposited to the Rollup UTXO sequentially, where each user spends from the latest Rollup UTXO to create an updated Rollup UTXO that includes their deposit. Relevant deposit data, including the public key identifying the user and deposit value, are hashed and committed to the Rollup State while the deposit is still pending. We use a Merkle Mountain Range [74] to commit sequential deposit data into a single pending deposits hash within the Rollup State. Figure 12 shows how the Pending Deposits Hash and Pending Deposits Count of the Rollup State gets updated as we construct the Merkle Mountain Range.
 
 <p align="center">
 <img src="figures/12.png" width="800"/>
 </p>
 
-_Figure 12. A user creates a deposit transaction by spending from the deposit path of the Rollup UTXO. This deposit transaction creates a new Rollup UTXO with an updated Rollup State commitment and the deposited amount added to the UTXO value. Pending Deposit Hash and Count are updated in the Rollup State as shown in the figure. The Pending Deposit Hash is computed by taking the hash of the concatenation of the Merkle Range roots from left to right. After the deposits are processed in L2 and the L2 state change containing the pending deposits is settled on L1 with an update transaction, then the pending deposits data is reset._
+_Figure 12. A user creates a deposit transaction by spending from the deposit path of the Rollup UTXO. This deposit transaction creates a new Rollup UTXO with an updated Rollup State commitment and the deposited amount added to the UTXO value. Pending Deposits Hash and Count are updated in the Rollup State as shown in the figure. The Pending Deposits Hash is computed by taking the hash of the concatenation of the Merkle Range roots from left to right. After the deposits are processed in L2 and the L2 state change containing the pending deposits is settled on L1 with an update transaction, the pending deposits data is reset._
 
 **Deposit Script Inputs**
 
@@ -390,7 +390,7 @@ All of these witness fields have a fixed size except for `<deposit_merkle_roots>
    1. Use `OP_INSPECTINPUTVALUE` to inspect the value of the Rollup UTXO being spent (the first input) and `OP_INSPECTOUTPUTVALUE` to inspect the value of the Rollup UTXO being created (the first output). Then verify that the latter is `<deposit_amount>` greater than the former value.
 2. **Verify `<current_rollup_state>` is correct.**
    1. First verify that the `<current_internal_key>` is correct. We can do this by introspecting the scriptPubKey of the Rollup UTXO being spent with `OP_INSPECTINPUTSCRIPTPUBKEY`, and then using `OP_TWEAKVERIFY` to verify that `<current_internal_key>` and the constant Taproot Script Tree root produce the output key in the Rollup UTXO being spent.
-   2. Then use `OP_TWEAKVERIFY` again to verify that the constant H, which is a point with an unknown discrete logarithm, and `<current_rollup_state>` produce `<current_internal_key>`. This sufficiently proves that the `<current_rollup_state>` is correct.
+   2. Then use `OP_TWEAKVERIFY` again to verify that the constant $H$, which is a point with an unknown discrete logarithm, and `<current_rollup_state>` produce `<current_internal_key>`. This sufficiently proves that the `<current_rollup_state>` is correct.
 3. **Compute the new Rollup State.**
    1. First extract Pending Deposits Hash and Pending Deposits Count from the `<current_rollup_state>`.
    2. Then verify that the `<deposit_merkle_roots>` is correct. The hash of `<deposit_merkle_roots>` should be equal to Pending Deposits Hash.
@@ -398,7 +398,7 @@ All of these witness fields have a fixed size except for `<deposit_merkle_roots>
    4. Then add this computed hash of the current deposit data to the current Merkle Mountain Range (MMR). The current peaks of the mountain range are provided by `<deposit_merkle_roots>`, so an MMR Update will produce an updated list of mountain range peaks that incorporates current deposit data. Take the hash of the concatenation of the new peaks to compute the new Pending Deposits Hash.
    5. Increment Pending Deposits Count by one. Concatenate the unchanged L2 State Root, the new Pending Deposits Hash, and the new Pending Deposits Count to produce the new Rollup State.
 4. **Verify that the new Rollup UTXO scriptPubKey uses an unchanged Taproot Script Tree and uses the correct Rollup State data commitment as the internal key.**
-   1. First verify that the `<new_internal_key>` is correct using the computed new Rollup State. We can do this with `OP_TWEAKVERIFY` to check that `<new_internal_key>` equals $H + int(hash(computed\_rollup\_state)) ∗ G$, where $H$ is a constant variable in the script.
+   1. First verify that the `<new_internal_key>` is correct using the computed new Rollup State. We can do this with `OP_TWEAKVERIFY` to check that `<new_internal_key>` equals $H + \textrm{int}(\textrm{hash}(computed\_rollup\_state)) \times G$, where $H$ is a constant variable in the script.
    2. Then introspect the new Rollup UTXO scriptPubKey address with `OP_INSPECTOUTPUTSCRIPTPUBKEY`. Verify that this scriptPubKey address was computed with `<new_internal_key>` and the unchanged Script Root using `OP_TWEAKVERIFY`. This check enforces the recursive covenant because it sufficiently proves that the Rollup UTXO being created uses an unchanged Taproot Script Tree and a correctly updated Rollup State.
 
 ### **4.2.5 L2 State Update**
@@ -411,7 +411,7 @@ L2 state update transaction is broadcasted by the L2 Rollup System to propose a 
 
 _Figure 13. The L2 Rollup System can settle a batch of L2 transactions and create user-requested withdrawal UTXOs by spending from the update path of the Rollup UTXO. An update transaction creates a new Rollup UTXO with the total withdrawal value subtracted from the rollup value and a batch of Withdrawal UTXOs._
 
-The L2 Rollup System creates this update transaction to confirm a batch of transactions. Since our L2 System allows for expressive smart contracts, these transactions are not limited to payments like withdrawal and transfers. These transactions are more generic and represent smart contract functions call in the L2 System. Details about the construction of these inputs are discussed in Section 4.3.2.3.
+The L2 Rollup System creates this update transaction to confirm a batch of transactions. Since our L2 System allows for expressive smart contracts, these transactions are not limited to payments like withdrawal and transfers. These transactions are more generic and represent smart contract function calls in the L2 System. Details about the construction of these inputs are discussed in Section 4.3.2.2.
 
 **L2 State Update Script Inputs**
 
@@ -431,30 +431,30 @@ The L2 Rollup System creates this update transaction to confirm a batch of trans
     i. Use `OP_CHECKSIG` to verify `<coordinator_signature>` against known public key of the authorized coordinator.
 2. **Verify that the new Rollup UTXO Value is correct.**
    1. First extract withdrawal data from `<compressed_block_data>`. Calculate the sum of all withdrawal amounts.
-   2. Then use `OP_INSPECTINPUTVALUE` to inspect the value of the Rollup UTXO being spent and `OP_INSPECTOUTPUTVALUE` to inspect the value of the Rollup UTXO being created. Then verify that the latter is less than the former by the value calculated in 2(a).
+   2. Then use `OP_INSPECTINPUTVALUE` to inspect the value of the Rollup UTXO being spent and `OP_INSPECTOUTPUTVALUE` to inspect the value of the Rollup UTXO being created. Then verify that the latter is less than the former by the value calculated in 2(1).
 3. **Verify <current_rollup_state> is correct.**
    1. First verify that the `<current_internal_key>` is correct. We can do this by introspecting the scriptPubKey of the Rollup UTXO being spent with `OP_INSPECTINPUTSCRIPTPUBKEY`, and then using `OP_TWEAKVERIFY` to verify that `<current_internal_key>` and the constant Taproot Script Tree root produce the output key in the Rollup UTXO being spent.
-   2. Then use `OP_TWEAKVERIFY` again to verify that the constant `H`, which is a point with an unknown discrete logarithm, and `<current_rollup_state>` produce `<current_internal_key>`. This sufficiently proves that the `<current_rollup_state>` is correct.
+   2. Then use `OP_TWEAKVERIFY` again to verify that the constant $H$, which is a point with an unknown discrete logarithm, and `<current_rollup_state>` produce `<current_internal_key>`. This sufficiently proves that the `<current_rollup_state>` is correct.
 4. **Verify all of the pending deposit data is included in the <**`compressed_block_data`**>.**
    1. First extract Pending Deposits Hash and Pending Deposits Count from the `<current_rollup_state>`.
    2. Extract the deposit data from `<compressed_block_data>` and verify that the total number of deposits is equal to Pending Deposits Count. Then construct the MMR from the deposit data. Verify that the hash of the concatenated MMR peaks is equal to the Pending Deposits Hash.
-5. **Verify that the withdrawal transactions included in the `<**compressed_block_data**>` have corresponding Withdrawal UTXOs in the transaction output.**
+5. **Verify that the withdrawal transactions included in the `<compressed_block_data>` have corresponding Withdrawal UTXOs in the transaction output.**
    1. Extract the withdrawal data from `<compressed_block_data>`.
    2. Verify the total number of Withdrawal UTXO in the transaction output match the total number of withdrawals in `<compressed_block_data>`.
    3. For each withdrawal data in `<compressed_block_data>`, introspect the transaction output using `OP_INSPECTOUTPUTSCRIPTPUBKEY` with the appropriate index to get the corresponding Withdrawal UTXO. Verify that the Withdrawal UTXO Value and scriptPubKey address match the withdrawal data.
 6. **Verify that the L2 state transition is correct.**
-   1. Prepare the parameters to pass into `OP_VERIFYSTARKPROOF`, which consist of `stark_proof`, `stark_input_state`, `stark_output_state`, and `stark_program_hash`. The `stark_program_hash` is a fixed constant stored within this script and represents the publicly known state transition function which encodes L2 state update rules. Set `stark_input_state` to `<current_L2_state_root>` and set `stark_output_state` to the concatenation of `<new_L2_state_root>` and the hash of `<compressed_block_data>`.
-   2. Verify the validity proof using `OP_VERIFYSTARKPROOF` with parameters `<stark_proof>`, `stark_input_state`, `stark_output_state`, and `stark_program_hash`.
+   1. Prepare the parameters to pass into `OP_VERIFYSTARKPROOF`, which consist of `<stark_proof>`, `<stark_input_state>`, `<stark_output_state>`, and `<stark_program_hash>`. The `<stark_program_hash>` is a fixed constant stored within this script and represents the publicly known state transition function which encodes L2 state update rules. Set `<stark_input_state>` to `<current_L2_state_root>` and set `<stark_output_state>` to the concatenation of `<new_L2_state_root>` and the hash of `<compressed_block_data>`.
+   2. Verify the validity proof using `OP_VERIFYSTARKPROOF` with parameters `<stark_proof>`, `<stark_input_state>`, `<stark_output_state>`, and `<stark_program_hash>`.
 7. **Compute the new Rollup State.**
-   1. Reset the pending deposit data. Set Pending Deposits Hash to 32-bytes of zeros. Set Pending Deposits count to 0.
-   2. Concatenate `<new_L2_state_root>` with the reset pending deposit data to produce the new Rollup State.
+   1. Reset the pending deposits data. Set Pending Deposits Hash to 32-bytes of zeros. Set Pending Deposits count to 0.
+   2. Concatenate `<new_L2_state_root>` with the reset pending deposits data to produce the new Rollup State.
 8. **Verify that the new Rollup UTXO scriptPubKey uses an unchanged Taproot Script Tree and uses the correct Rollup State data commitment as the internal key.**
-   1. First verify that the `<new_internal_key>` is correct using the computed new Rollup State. We can do this with `OP_TWEAKVERIFY` to check that `<new_internal_key>` equals `H + int(hash(computed_rollup_state))*G`, where `H` is a constant variable in the script.
+   1. First verify that the `<new_internal_key>` is correct using the computed new Rollup State. We can do this with `OP_TWEAKVERIFY` to check that `<new_internal_key>` equals $H + \textrm{int}(\textrm{hash}(computed\_rollup\_state))\times G$, where $H$ is a constant variable in the script.
    b. Then introspect the new Rollup UTXO scriptPubKey address with `OP_INSPECTOUTPUTSCRIPTPUBKEY`. Verify that this scriptPubKey address was computed with `<new_internal_key>` and the unchanged Script Root using `OP_TWEAKVERIFY`. This check enforces the recursive covenant because it sufficiently proves that the Rollup UTXO being created uses an unchanged Taproot Script Tree and a correctly updated Rollup State.
 
 ### **4.2.6 Unilateral Withdrawal**
 
-Unilateral Withdrawal Transaction is submitted by the user directly to L1 Rollup Protocol. Typically users withdraw rollup funds by submitting a request to the L2 Rollup System, which is then processed in a state update transaction. However, a user can also create a unilateral withdrawal transaction to withdraw rollup funds without the cooperation of the L2 Rollup System, which is important in the event that the L2 Rollup System is uncooperative. The transaction structure of a unilateral withdrawal transaction is shown in Figure 14.
+Unilateral Withdrawal Transaction is submitted by the user directly to the L1 Rollup Protocol. Typically users withdraw rollup funds by submitting a request to the L2 Rollup System, which is then processed in a state update transaction. However, a user can also create a unilateral withdrawal transaction to withdraw rollup funds without the cooperation of the L2 Rollup System, which is important in the event that the L2 Rollup System is uncooperative. The transaction structure of a unilateral withdrawal transaction is shown in Figure 14.
 
 <p align="center">
 <img src="figures/14.png" width="600"/>
@@ -495,10 +495,10 @@ To unilaterally withdraw funds from the Rollup UTXO, a user must present a Merkl
     2. Use the updated account leaf hash and `<withdrawal_proof>` to compute the new Merkle Root.
     3. Update the L2 State Root in `<current_rollup_state>` to the computed Merkle Root.
 6. Verify that the new Rollup UTXO scriptPubKey uses an unchanged Taproot Script Tree and uses the correct Rollup State data commitment as the internal key.
-    1. First verify that the `<new_internal_key>` is correct using the computed new Rollup State. We can do this with `OP_TWEAKVERIFY` to check that `<new_internal_key>` equals $H + \textrm{int}(\textrm{hash}_{}(computed\_rollup\_state))*G$, where $H$ is a constant variable in the script.
+    1. First verify that the `<new_internal_key>` is correct using the computed new Rollup State. We can do this with `OP_TWEAKVERIFY` to check that `<new_internal_key>` equals $H + \textrm{int}(\textrm{hash}_{}(computed\_rollup\_state))\times G$, where $H$ is a constant variable in the script.
     2. Then introspect the new Rollup UTXO scriptPubKey address with `OP_INSPECTOUTPUTSCRIPTPUBKEY`. Verify that this scriptPubKey address was computed with `<new_internal_key>` and the unchanged Script Root using `OP_TWEAKVERIFY`. This check enforces the recursive covenant because it sufficiently proves that the Rollup UTXO being created uses an unchanged Taproot Script Tree and a correctly updated Rollup State.
 
-### 4.2.7 **Proof Verification Opcode**
+### **4.2.7 Proof Verification Opcode**
 
 We propose to introduce in Bitcoin a verification opcode for FRI-based proof system (STARK). Section 5.4 goes more into the details of FRI-based proof system. The implementation of such verifier requires only the cryptographic assumption of a collision-resistant hash function like SHA256, which is available in Bitcoin. In addition, the verification process is poly-logarithmic with respect to the size of the computation, which translates to under 2 ms for a proof size of about 100 KB [60]. This is what we expect for our rollup design.
 
@@ -514,11 +514,11 @@ We propose `OP_VERIFYSTARKPROOF` opcode to verify a FRI-based proof. It takes as
 
 `<stark_output_state>` is the concatenation of the new L2 State Root and the hash of the compressed block data.
 
-The L1 Rollup Protocol constructs the `<stark_output_state>` from the proposed new L2 state root and the compressed block data committed by the L2 Rollup System along with the proof. This construction ensures that the verifier performs the verification on the committed set of public inputs, and therefore will fail if the proof was generated using different inputs. For example, if the committed set of compressed block data is inconsistent with the block of transactions used to generate the proof, verifier will fail. This ensures the correctness of the witness data posted to L1 blockchain. Also note that the verifier does not need the entire program, but rather only its hash, to be able to verify the accuracy of its execution. This is at the heart of verifiable computation, in which the verifier outsources the computation to the prover but can still verify its correctness without the knowledge of specific details of the computation.
+The L1 Rollup Protocol constructs the `<stark_output_state>` from the proposed new L2 State Root and the compressed block data committed by the L2 Rollup System along with the proof. This construction ensures that the verifier performs the verification on the committed set of public inputs, and therefore will fail if the proof was generated using different inputs. For example, if the committed set of compressed block data is inconsistent with the block of transactions used to generate the proof, verifier will fail. This ensures the correctness of the witness data posted to L1 blockchain. Also note that the verifier does not need the entire program, but rather only its hash, to be able to verify the accuracy of its execution. This is at the heart of verifiable computation, in which the verifier outsources the computation to the prover but can still verify its correctness without the knowledge of specific details of the computation.
 
 `OP_VERIFYSTARKPROOF` executes STARK verification protocol using the `<stark_proof>` and public inputs (`<program hash>`, `<stark_input_state>` and `<stark_output_state>`). It pushes `True` in the stack if the verification is successful and `False` if the verification fails. Internally, `OP_VERIFYSTARKPROOF` uses a fixed arithmetization scheme that encodes the constraints of a general zkVM execution stack. The Prover in L2 Rollup System uses the same arithmetization to generate the validity proof. We do not discuss in detail the design of such scheme in this paper. However, we address potential options for Bitcoin in Sections 5.3 and 5.4.
 
-## 4.3 Layer 2 Rollup System
+## **4.3 Layer 2 Rollup System**
 
 In this section, we introduce an expressive L2 Rollup System on top of the Bitcoin Rollup Protocol we introduced in Section 4.2. This L2 System is capable of executing arbitrary smart contracts that can support decentralized finance applications, while inheriting the double-spend security of Bitcoin without any additional security assumptions. Since there are multiple rollup systems implemented for other blockchains, we show a simple L2 rollup construction, inspired by Ethereum and StarkNet, capable of handling complex smart contracts. The L2 Rollup System demonstrates the capabilities that can be built on top of the Bitcoin Rollup Protocol, but does not strictly subscribe to a particular implementation.
 
@@ -526,7 +526,7 @@ In this section, we introduce an expressive L2 Rollup System on top of the Bitco
 
 In this section, we provide an overview of key building blocks and concepts in our L2 Rollup System such as accounts, smart contracts, transactions, and data availability. In subsequent sections, we discuss the details of system components and how they interact with each other.
 
-### 4.3.1.1 Accounts
+### **4.3.1.1 Accounts**
 
 In our design, there is no structural difference between an account that belongs to a user and an account that belongs to a smart contract; both are implemented as contract accounts. This idea is referred to as “account abstraction”, introduced in EIP 4337 [78] and also implemented by StarkNet [79]. Abstracting a user account as a contract account, as opposed to a static representation such as in Ethereum, allows the user much more flexibility on the process of validation and execution of the transactions they initiate. For example, user can choose to validate their transaction with the phone’s face ID instead of signing with their private key, or choose to pay with a currency different than bitcoin. In addition, user can customize how their account functions in response to a transaction they receive. This allows for a much better user experience, and supports adding complex payments such as subscriptions or streaming payments right in the account construct.
 
@@ -551,7 +551,7 @@ Each account contains `storage_root` which refers to the root of its storage tre
 
 We use Patricia-Merkle trie to store the persistent data for each account as key-value mappings. Patricia-Merkle trie allows for efficient retrieval and update for key-value mappings while being storage-efficient and having a concise root hash as a commitment to be stored in account data. For our L2 Rollup System, we have adapted the storage trie design similar to Ethereum, in which a key is a 32-byte hash of the “index” of the leaf node, and it is associated with a variable name. Each leaf node contains a 32-byte “slot”, and a slot, or multiple slots, stores the RLP encoding of the value of the variable that the leaf represents. This construction can store values with a wide variety of data types such as strings, arrays, and maps [80].
 
-### 4.3.1.2 Smart Contracts
+### **4.3.1.2 Smart Contracts**
 
 Smart contracts are made up of data and functions, similar to an object-oriented class structure. The data for a contract is stored in the storage tree of the associated account. Functions can have arbitrary logic, can be private or public, and can access and update the contract data. A public function can be invoked by external accounts through a transaction or a call from within their contract code.
 
@@ -604,7 +604,7 @@ func transfer(destination_account_address, amount)
 func withdraw(amount, destination_L1_address)
 ```
 
-### 4.3.1.3 Transactions
+### **4.3.1.3 Transactions**
 
 **L2 Transactions**
 
@@ -644,7 +644,7 @@ The transaction structure and the field values are validated for correct constru
 
 The L2 Rollup System also keeps track of the transactions initiated on the Bitcoin layer, namely deposits and unilateral withdrawals. A deposit transaction in L1 causes a new user account creation or an increase in the balance of an existing account in L2. On the other hand, a unilateral withdrawal transaction causes a decrease in the balance of an account in L2. Those L2 state changes are performed by the system during the transaction execution stage described in Section 4.3.3.
 
-### 4.3.1.4 Data Availability
+### **4.3.1.4 Data Availability**
 
 The L2 block data needs to be posted in a compressed form to L1 so that anyone can construct the L2 State Tree just by inspecting the Bitcoin blockchain. This is important in the case where the L2 System fails, and the users need to make a unilateral withdrawal transaction on L1 to release their funds. This is also called data availability. In addition, the compressed data is also used by the Bitcoin Rollup Protocol to verify the accuracy of the state update transaction broadcasted to L1. The compressed block data has the following structure:
 
@@ -676,7 +676,8 @@ For each deployed contract: account_id (5 bytes), account_address (32 bytes).
 
 For each updated account with no storage update: account_id (5 bytes), new_balance (~4 bytes on avg+.5 byte to denote the size), new_nonce (2 bytes on avg + .5 byte to denote the size ).
 
-For each updated account with storage update: Everything above + `<storage_diff>` - a list of key-value updates in the account storage
+For each updated account with storage update: Everything above + `<storage_diff>` - a list of key-value updates in the account storage. 
+
 
 `<storage_diff>` contains:
 
@@ -684,7 +685,7 @@ Number of key-value updates, K (2 bytes).
 
 For each key-value update: updated key: 16 bytes on avg (+ 1 byte to denote the size), updated value: 16 bytes on avg (+ 1 byte to denote the size)
 
-Hence, the total size of the `<state_diff>` is: 6+25*D+12*T+(34*K+14)*S. The estimation of the distribution of D, P, and S is performed on the basis of real Ethereum transactions, as discussed in the next subsection, is used in table below. Furthermore, we assume 5 key-value updates on average per account with storage update (K).
+Hence, the total size of the `<state_diff>` is: 6+25D+12T+(34K+14)S. The estimation of the distribution of D, P, and S is performed on the basis of real Ethereum transactions, as discussed in the next subsection, is used in table below. Furthermore, we assume 5 key-value updates on average per account with storage update (K).
 
 | State Diff Body Component                                    | Unit Size (bytes) | Distribution |
 | ------------------------------------------------------------ | ----------------- | ------------ |
@@ -698,7 +699,7 @@ We expect the overwhelming majority of the compressed block data to be the state
 
 **Analysis — Transaction distribution in Ethereum**
 
-We look at transactions on Ethereum to estimate the distribution of the variables D, T, and S introduced above. Since the required aggregate statistics aren’t readily available, we use a data dump provided by Blockchair for Nov 15th, 2022 and Jan 26th, 2023 to analyze the detail transaction data in the combined 14,317 \*\*\*\*blocks[82]. We chose these two random days in a period of three months to cross-verify results and reduce statistical bias in our estimation. We found that these two days resulted in a similar distribution. The analysis we present is on the aggregated data.
+We look at transactions on Ethereum to estimate the distribution of the variables D, T, and S introduced above. Since the required aggregate statistics aren’t readily available, we use a data dump provided by Blockchair for Nov 15th, 2022 and Jan 26th, 2023 to analyze the detail transaction data in the combined 14,317 blocks [82]. We chose these two random days in a period of three months to cross-verify results and reduce statistical bias in our estimation. We found that these two days resulted in a similar distribution. The analysis we present is on the aggregated data.
 
 There were 2.18 million transactions processed on Ethererum by 879,00 different addresses in the blocks corresponding to the aforementioned two days. After removing a tiny fraction(<1%) of coinbase transactions, which are not relevant in our design, the distribution of the rest of the transaction types (as encoded by Blockchair) is shown in the table below.
 
@@ -710,7 +711,7 @@ There were 2.18 million transactions processed on Ethererum by 879,00 different 
 
 Furthermore, we estimated the average number of distinct account updates for each transaction because we post account updates in our state diff instead of transactions. For every 10-minute duration, which is the expected block time for our rollup system, we counted the number of transactions in all the Ethereum blocks during that timeframe and divide by total number of distinct addresses involved in those transactions. We found that each account on average was responsible for 1.27 transactions, which equates to 0.787 distinct account changes per transaction.
 
-### 4.3.1.6 System Components
+### **4.3.1.5 System Components**
 
 The L2 rollup system consists of three major components: the rollup coordinator, the transaction executor, and the prover. These components work together to produce a block of transactions, execute them, and generate a proof of valid L2 state transition to submit to L1 for verification. We discuss their functions in detail in the following subsections.
 
@@ -724,19 +725,19 @@ A Rollup Coordinator is responsible for accepting and validating transactions, a
 
 _Figure 16: Rollup Coordinator includes the Rollup Service, L1 Watcher, L2 Mempool, and the Block Producer. The L2 Mempool holds queues that store incoming transactions in the Rollup layer. The Rollup Service is an RPC interface that allows L2 users to submit transactions. The L1 Watcher facilitates communication between the Bitcoin Layer and the Rollup layer. Block Producer validates L2 blocks and initiates L2 State Update transactions._
 
-### **4.3.2.2** Rollup Service and L1 Watcher
+### **4.3.2.1 Rollup Service and L1 Watcher**
 
 Rollup Service and L1 Watcher are components responsible for populating the L2 Mempool with transactions.
 
 Rollup Service is a user-facing component that accepts L2 transactions created by users through a Remote Procedure Call (RPC) or a REST API. It validates these transactions against basic validation rules such as checking syntax, transaction structure, and the signatures. It also runs the `validate()` function in sender’s account for each transaction. Once the basic validation is complete, the Rollup Service adds the transactions to the L2 Mempool in a L2 Transaction Queue, in the order that they were received.
 
-The L1 Watcher monitors the Bitcoin mempool for L1 Rollup Transactions using bitcoin’s RPC interface. It stores these L1 transactions (deposit and unilateral_withdrawal) in the L1 Transaction Queue in L2 Mempool and constantly updates this queue with the latest rollup transactions in the L1 Mempool. Since these transactions are validated in L1, they do not require additional validation.
+The L1 Watcher monitors the L1 Mempool for L1 Rollup Transactions using bitcoin’s RPC interface. It stores these L1 transactions (deposit and unilateral_withdrawal) in the L1 Transaction Queue in L2 Mempool and constantly updates this queue with the latest rollup transactions in the L1 Mempool. Since these transactions are validated in L1, they do not require additional validation.
 
-### **4.3.2.3** Block Producer
+### **4.3.2.2 Block Producer**
 
 The Block Producer is responsible for constructing a block of transactions, broadcasting L2 State Update transaction, and maintaining the internal L2 state. The internal state always maintains the last confirmed L2 State Tree, in case the L2 state needs to revert to the previous state if L1 confirmation of the constructed block is not successful.
 
-Before constructing a block, the block producer waits until the number of transactions in the mempool reaches a certain threshold, or until a certain predefined time. Then, it collects all the L1 transactions and L2 transactions, in that order, from the mempool. This is to ensure that the transaction executor executes the L1 transactions, especially the unilateral transactions, before L2 transactions. As a result, a unilateral withdrawal requested by a certain user updates the L2 account state before any L2 transfer transactions originating from the same user are executed. This makes sure that the account has enough balance for the transfer transactions.
+Before constructing a block, the block producer waits until the number of transactions in the L2 Mempool reaches a certain threshold, or until a certain predefined time. Then, it collects all the L1 transactions and L2 transactions, in that order, from the L1 Mempool. This is to ensure that the transaction executor executes the L1 transactions, especially the unilateral transactions, before L2 transactions. As a result, a unilateral withdrawal requested by a certain user updates the L2 account state before any L2 transfer transactions originating from the same user are executed. This makes sure that the account has enough balance for the transfer transactions.
 
 This collection of transactions is the pending block, which is passed to the transaction executor. The transaction executor can remove any invalid transactions from this block if it encounters an error during execution. Once the proof is generated for the correct execution of a block of transactions, the block producer uses that proof in the state update transaction that it broadcasts to L1.
 
@@ -755,10 +756,10 @@ _Figure 17: The L2 State Update Transaction Witness includes the `stark_proof` t
 - `<coordinator_sig>`: The Block Producer has a private key that it uses to sign each message it broadcasts to the L1 Mempool. This signature confirms to the L1 Protocol that this message was authorized by a valid coordinator. This is 64 bytes.
 - `<stark_proof>`: This is the proof received from the Prover described in Section 4.3.4.
 - `<new_L2_state_root>`: This is the root of the L2 State Tree produced after transaction executor executes the transactions in the pending block. This is 32 bytes.
-- `<compressed_block_data>`: This represents the state changes made by the pending block. The rollup coordinator constructs this once the pending block is executed and filtered by the transaction executor. Its construction is described in Section 4.3.1.5. It has a variable size depending on the number of transactions in the block.
-- `<current_rollup_state>`: The rollup state consists of the root of the L2 State Tree, the pending deposits tree, and the deposit count, as shown in Section (ref). Current L2 State Root is the root of the last confirmed L2 State Tree. The pending deposits tree and deposit count are constructed using all deposit transactions since the last L2 State Update. This is 66 bytes.
-- `<current_internal_key>`: Once the current rollup state has been constructed, the current internal key can be generated using the following formula, $P = H + \textrm{int}(\textrm{hash}_{}(current\_rollup\_state))*G$, as mentioned in Section 4.2.3. This is 32 bytes.
-- `<new_internal_key>`The new rollup state is constructed using the `<new_L2_state_root>`, an empty deposit tree, and deposit count set to zero. The new internal key, as above, is calculated from the new rollup state. This is 32 bytes.
+- `<compressed_block_data>`: This represents the state changes made by the pending block. The rollup coordinator constructs this once the pending block is executed and filtered by the transaction executor. Its construction is described in Section 4.3.1.4. It has a variable size depending on the number of transactions in the block.
+- `<current_rollup_state>`: The rollup state consists of the root of the L2 State Tree, the pending deposits tree, and the deposit count, as shown in Section 4.2.3. Current L2 State Root is the root of the last confirmed L2 State Tree. The pending deposits tree and deposit count are constructed using all deposit transactions since the last L2 State Update. This is 66 bytes.
+- `<current_internal_key>`: Once the current rollup state has been constructed, the current internal key can be generated using the following formula, $P = H + \textrm{int}(\textrm{hash}_{}(current\_rollup\_state))\times G$, as mentioned in Section 4.2.3. This is 32 bytes.
+- `<new_internal_key>`The new rollup state is constructed using the `<new_L2_state_root>`, an empty pending deposits tree, and pending deposits count set to zero. The new internal key, as above, is calculated from the new rollup state. This is 32 bytes.
 
 **Update Script and Control Block:**
 
@@ -766,23 +767,23 @@ In addition to the `<update_inputs>`, the L2 State Update witness also requires 
 
 **Transaction Outputs:**
 
-Rollup UTXO: The Block producer generates the scriptPubKey for the Rollup UTXO by performing the TapTweak hash [84] with the `<new_internal_key>` and the root of the P2TR script tree, which is a known constant.
+<u>Rollup UTXO:</u> The Block producer generates the scriptPubKey for the Rollup UTXO by performing the TapTweak hash [84] with the `<new_internal_key>` and the root of the P2TR script tree, which is a known constant.
 
-Withdrawal UTXOs: The Block Producer now needs to construct the list of withdrawals from the rollup that needs to be part of the outputs of State Update transaction. To do this, the Block Producer iterates over all the withdrawal transactions in the pending block and constructs an output with the requested amount and a scriptPubKey according to the user’s specification, most likely a P2PKH with the user’s L1 public key.
+<u>Withdrawal UTXOs:</u> The Block Producer now needs to construct the list of withdrawals from the rollup that needs to be part of the outputs of State Update transaction. To do this, the Block Producer iterates over all the withdrawal transactions in the pending block and constructs an output with the requested amount and a scriptPubKey according to the user’s specification, most likely a P2PKH with the user’s L1 public key.
 
-The Block Producer now has everything that it needs to broadcast an L2 State Update transaction in L1. When it receives the proof, the Block Producer broadcasts the State Update transaction, using as parent the last transaction in the L1 transactions queue. Once the L2 State Update Transaction is confirmed on L1, the Block Producer updates the last confirmed L2 State Tree and adds the pending block to the L2 blockchain. This officially marks this block as confirmed.
+The Block Producer now has everything that it needs to broadcast an L2 State Update transaction in L1. When it receives the proof, the Block Producer broadcasts the State Update transaction, using as parent the last transaction in the L1 Transaction Queue. Once the L2 State Update Transaction is confirmed on L1, the Block Producer updates the last confirmed L2 State Tree and adds the pending block to the L2 blockchain. This officially marks this block as confirmed.
 
 The following sections describe the execution of the pending block and the generation of the validity proof.
 
 ### **4.3.3 Transaction Executor**
+
+Transaction executor module takes the pending block of transactions and the latest L2 State Tree confirmed on L1 from the Rollup Coordinator. The role of the Transaction Executor is to execute the pending block of transactions to generate new L2 State Root and an execution trace, as shown in Figure 18. The new L2 State Root is the new root of the L2 State Tree after executing the block of transactions. Execution trace is generated by executing a compiled state transition program on the VM and is passed on to the Prover module to produce a validity proof of correct execution.
 
 <p align="center">
 <img src="figures/18.png" width="600"/>
 </p>
 
 _Figure 18: Transaction Executor interacts with the Prover and the Rollup Coordinator of the L2 Rollup System to generate the execution trace of transactions in the proposed block._
-
-Transaction executor module takes a proposed block of transactions and the latest L2 State Tree confirmed on L1 from the Rollup Coordinator. The role of the Transaction Executor is to execute the pending block of transactions to generate new L2 State Root and an execution trace, as shown in Figure 18. The new L2 State Root is the new root of the L2 State Tree after executing the block of transactions. Execution trace is generated by executing a compiled state transition program on the VM and is passed on to the Prover module to produce a validity proof of correct execution.
 
 **Fixed State Transition Program**
 
@@ -806,7 +807,7 @@ Each transaction in the pending block contains the witness information (such as 
       3. If error during validation or execution, reject the transaction, notify the system, remove transaction from the block, and continue to next transaction.
       4. If this is withdrawal transaction, append to `withdrawals`. Else, append to `rest`.
    3. Merkle-update the L2 State Tree. Update `new_root` with the root of this new tree.
-6. Using `deposits`, `withdrawals`, and `rest`, construct the compressed block data according to the structure described in Section 4.3.1.5. Assign it as `compressed_block_data`.
+6. Using `deposits`, `withdrawals`, and `rest`, construct the compressed block data according to the structure described in Section 4.3.1.4. Assign it as `compressed_block_data`.
 7. Assign `output_state = new_root + hash(bytes(compressed_block_data))`.
 8. Push `output_state` to the stack and return.
 
@@ -830,7 +831,7 @@ The prover generates a validity proof attesting to the correctness of the execut
 
 While we choose FRI-based proof system in our current Bitcoin rollup design, there is active research on this area, and we have ample flexibility to explore various different proof systems. Section 5.2 discusses in great detail various proof systems and their properties. Section 5.3 explains our rationale for picking FRI-based proof system in our first design iteration.
 
-### 4.2.4 Tying it together
+### **4.3.5 Tying it together**
 
 In the prior sections, we described many components of the proposed design in detail. We now take a bird’s eye view of the entire system, including zooming into the Bitcoin layer.
 
@@ -838,21 +839,21 @@ In the prior sections, we described many components of the proposed design in de
 <img src="figures/19.png" width="800"/>
 </p>
 
-_Figure 19: The rollup system collects a batch of L2 transactions, prepares the validity proof for the batch, and broadcasts that information to the Bitcoin network through a Rollup State update transaction. This transaction builds up from the last rollup transaction in the Bitcoin Mempool. The rollup transactions go through the rollup smart contract verification in addition to consensus rules verification before ending up in the candidate blocks being worked on by the Bitcoin node._
+_Figure 19: The rollup system collects a batch of L2 transactions, prepares the validity proof for the batch, and broadcasts that information to the Bitcoin network through a Rollup State update transaction. This transaction builds up from the last rollup transaction in the Bitcoin (L1) Mempool. The rollup transactions go through the rollup smart contract verification in addition to consensus rules verification before ending up in the candidate blocks being worked on by the Bitcoin node._
 
 The upper portion of the Figure 19 shows our L2 rollup system. The Rollup Service pushes into L2 Mempool the L2 transactions from the users. Similarly, the L1 watcher keeps track of the L1 Mempool, and maintains in the L2 Mempool a queue of unilateral withdrawal transactions and deposit transactions initiated in L1. The block producer takes the transactions from the L2 Mempool to create a block. It is called a pending block because it is the block being proposed for validity proof verification, but not verified yet. The pending block passes through the transaction executor and the prover, which generate the validity proof for the state transition for that block. When the validity proof is ready, the block producer packages it into a Rollup State update transaction with its parent transaction being the latest rollup transaction in the Bitcoin Mempool. This transaction then gets broadcasted to the Bitcoin network.
 
-The lower portion of Figure 19 shows the details on the Bitcoin layer. The latest confirmed block, as well as the mempool, contains various “regular” transactions along with the rollup transactions. A user creates a new rollup transaction on top of the latest rollup transaction visible to them.
+The lower portion of Figure 19 shows the details on the Bitcoin layer. The latest confirmed block, as well as the Bitcoin Mempool, contains various “regular” transactions along with the rollup transactions. A user creates a new rollup transaction on top of the latest rollup transaction visible to them.
 
 Before a Bitcoin node adds the transactions to their candidate block, they go through the Bitcoin transaction validation process. For the rollup state update transaction, this involves the execution of the update script in Bitcoin Rollup Protocol, in addition to the verification of other consensus rules. Multiple nodes go through this process, generating each of their own candidate block that may include the rollup state update transaction. One of the blocks gets mined and confirmed in L1. If the mined block contains the rollup state update transaction, the pending L2 block corresponding to this transaction is also marked as confirmed.
 
-### 4.2.5 Scalability Analysis
+### **4.3.6 Scalability Analysis**
 
 The scalability analysis aims to determine the potential reduction in on-chain data size and fees as a result of executing a block of N different transactions off-chain and aggregating them into one state update transaction broadcasted to the Bitcoin layer, compared to executing each transaction individually on the Bitcoin blockchain. Four values of N are considered in our analysis: 100, 1000, 10,000, and 100,000.
 
 The average size of a Bitcoin transaction in the past year is just over 560 vBytes [76]. The next section discusses the size of an average L2 state update transaction according to our design.
 
-### Size of L2 State Update Transaction
+#### **4.3.6.1 Size of L2 State Update Transaction**
 
 An L2 update transaction contains an input spending the rollup (using P2TR witness), an output paying to the rollup (using P2TR), and multiple other withdrawal outputs paying to users (assume P2WPKH). Following is the breakdown of the inputs and outputs.
 
@@ -874,7 +875,7 @@ The bulk of the update transaction input contains witness items. Following are t
 | Total (bytes)         |              | 66,955       | 151,355     | 770,355      | 6,760,355     |
 | Total (vBytes)        |              | 16,738.75    | 37,838.75   | 192,588.75   | 1,690,088.75  |
 
-Proof size for STARK varies according to the number of batch transactions. We use a range of 50-150 kilobytes, which is a reasonable estimation based on latest open-source implementations[71]. The size of compressed block data per transaction is discussed in Section 4.3.1.5. We use 10 KB as the size of update script, which is ample space for a script of this nature. Control block is exactly 129 bytes. The size of rest of the witness items are discussed in Section 4.3.2.3. In a segwit transaction, size of witness items in vBytes = 1/4\* size in bytes, which is reflected in the table above.
+Proof size for STARK varies according to the number of batch transactions. We use a range of 50-150 kilobytes, which is a reasonable estimation based on latest open-source implementations[71]. The size of compressed block data per transaction is discussed in Section 4.3.1.4. We use 10 KB as the size of update script, which is ample space for a script of this nature. Control block is exactly 129 bytes. The size of rest of the witness items are discussed in Section 4.3.2.2. In a segwit transaction, size of witness items in vBytes = 1/4\* size in bytes, which is reflected in the table above.
 The rest of the input fields are exactly the same as P2WSH input, totaling to the size of 41.25 vBytes. The rest of the input fields are exactly the same as P2WSH input, totaling to the size of 41.25 vBytes.
 
 **Transaction outputs**
@@ -885,7 +886,7 @@ The first output is a standard P2TR output whose size is 43 vBytes and rest of t
 
 For a batch update with N transactions (N = 1K and 10K) following are the total sizes.
 
-| Transaction section | vBytes (N=100) | vBytes (N=1K) | vBytes (N=10K) | vBytes (N=100K) |
+| Transaction Section | vBytes (N=100) | vBytes (N=1K) | vBytes (N=10K) | vBytes (N=100K) |
 | ------------------- | -------------- | ------------- | -------------- | --------------- |
 | Witness items       | 16,738.75      | 37,838.75     | 192,588.75     | 1,690,088.75    |
 | Other inputs        | 41.25          | 41.25         | 41.25          | 41.25           |
@@ -893,13 +894,15 @@ For a batch update with N transactions (N = 1K and 10K) following are the total 
 | Overhead fields     | 10.5           | 10.5          | 10.5           | 10.5            |
 | Total               | 16988.5        | 39483.5       | 208183.5       | 1845183.5       |
 
-### Scalability gain
+### **4.3.6.2 Scalability gain**
+
+The scaling factor (scalability gained) represents the multiple by which the vBytes on the Bitcoin blockchain get reduced, which is equal to the reduction in the transaction fees.
 
 We can calculate the scalability gained as:
 
 `scaling factor = (N * avg size of one Bitcoin transaction) / size of corresponding rollup P2TR transaction`
 
-The scaling factor (scalability gained) represents the multiple by which the vBytes on the Bitcoin blockchain get reduced, which is equal to the reduction in the transaction fees.
+The table below shows throughput improvement for different values of N.
 
 | Number of Transactions (N) | vBytes with separate Bitcoin on-chain txs | vBytes with a rollup update Tx | Throughput Improvement |
 | -------------------------- | ----------------------------------------- | ------------------------------ | ---------------------- |
@@ -916,9 +919,9 @@ Similarly, the research on FRI-based proof systems is at its infancy, and the pa
 
 In conclusion, while we see significant scalability factors with this proposed design, we can expect to get even greater improvements on these numbers in the future with more research and design iterations.
 
-# 5 Zero Knowledge Protocols
+# **5 Zero Knowledge Protocols**
 
-## 5.1 Foundations
+## **5.1 Foundations**
 
 A mathematical proof, in a traditional sense, is a static construct based on axioms and logical deductions that can be verified step-by-step. However, the notion of proof discussed in this section is dynamic and probabilistic in nature. This dynamic interpretation of proof led to the development of what we call \textit{interactive proof (IP)}. The interaction takes place between two parties called the \textit{prover} and the \textit{verifier}. The system that defines how a \textit{prover} generates the proof and how a \textit{verifier} validates the proof is called the \textit{proof system}.
 
@@ -938,7 +941,7 @@ Argument systems are designed using two mathematical building blocks. The first 
 
 An argument system is zero-knowledge if the prover can prove a claim to the verifier without revealing any information in the process. The verifier gains no additional information beyond just the fact that the claim is true. The notion of zero-knowledge proof was first introduced in 1985 by MIT researchers, where they gave the very first zero-knowledge proof of a well-defined problem [45].
 
-## 5.2 Proof Systems
+## **5.2 Proof Systems**
 
 The development of recent proof systems has been fueled by two fundamental problems of the decentralized blockchain: privacy and scalability. proof systems achieved privacy by shielding the inputs of the computation (zero-knowledge proofs) and scalability by generating a succinctly verifiable proof of computation. Most modern proof systems are built using polynomial IOP as the information-theoretic part and a polynomial commitment scheme as the cryptographic primitive [46]. Interactive oracle proof (IOP) is an interactive proof (IP) where the verifier does not have to read the prover’s entire message. The verifier can randomly query the prover’s messages, which are polynomials defined over a finite field. Polynomial IOP generates the polynomial constraints from the computation and the polynomial commitment scheme is used to prove that the polynomial constraints are satisfied.
 
@@ -950,7 +953,7 @@ In what follows, we will discuss in details the workflow of generating the proof
 
 _Figure 20: The figure above shows the proof generation step in the a polynomial IOP based proof system. A computation is arithmetized to obtain a constraints system. Polynomial interpolation of the system leads to an abstract protocol we call Polynomial IOP. It is then cryptographically compiled with polynomial commitment scheme and Fiat-Shamir transformation to obtain a non-interactive proof system._
 
-### 5.2.1 **Arithmetization, Interpolation and Polynomial IOP**
+### **5.2.1 Arithmetization, Interpolation and Polynomial IOP**
 
 As a first step, a proof system needs some way to represent the computation. Computers represent programs in machine language with operations over registers and memory and these operations are carried out in bits. However, for a proof system to generate succinct proof of computation, nice error correcting properties of polynomials can be used. In order to compute these polynomials, the computation to be proven is first converted into a system of constraints. These are basically equations with coefficients and variables defined over a finite field. This transformation of problem from the computation/circuit space to polynomial space is called the arithmetization.
 
@@ -958,7 +961,7 @@ There are multiple approaches to generating such constraint systems. R1CS (Rank 
 
 Through interpolation, the system of constraints are converted into low-degree univariate polynomials that the prover can send to the verifier as part of the polynomial IOP. Verifier can then make random queries to the oracle to validate the proof. To make the proof system non-interactive and efficient, it is cryptographically compiled using polynomial commitment scheme and Fiat-Shamir transformation.
 
-### 5.2.2 **Polynomial Commitment Schemes**
+### **5.2.2 Polynomial Commitment Schemes**
 
 Commitment schemes are the building blocks of many cryptographic protocols. A commitment scheme allows a committer to publish a value which binds the committer to the original message without revealing it. A polynomial commitment scheme allows prover to commit to a polynomial with one property: it can later be opened to show that the value of the polynomial at a certain point is equal to the claimed value.
 
@@ -969,7 +972,7 @@ Polynomial commitment scheme (PCS) used in the polynomial IOP based proof system
 3. **FRI-based PCS:** FRI is a hash function based commitment scheme that performs a low-degree check on the committed polynomials. STARK proof systems [52], Plonky2 [53] and RedShift [54] uses FRI commitment scheme for its transparent setup and proof composition.
 4. **DARK PCS:** Diophantine argument of knowledge is a polynomial commitment scheme based on the groups of unknown order. The commitment scheme is used in SuperSonic proof system to create a transparent zk-SNARK protocol [55].
 
-### 5.2.3 **Non-Interactive Proof using Fiat-Shamir Transformation**
+### **5.2.3 Non-Interactive Proof using Fiat-Shamir Transformation**
 
 While interactive proof systems laid the foundation for modern proofs systems, they are not well suited for practical applications because of the liveliness and interactivity required for both the prover and verifier.
 
@@ -981,23 +984,23 @@ Fiat and Shamir in 1980s introduced a heuristic technique to convert a $\Sigma$-
 
 Using cryptographic hash function as a random oracle model, Fiat-Shamir transformation reduces the interactions to a single message from the prover to the verifier. Random oracle model (ROM) is a theoretical model that assumes the existence of a truly random function accessible to all parties. Most modern proof systems are polynomial IOP based and use this transformation to achieve a non-interactive protocol.
 
-### 5.2.4 **Characteristics of various proof systems**
+### **5.2.4 Characteristics of various proof systems**
 
 We can categorize proof systems based on three key properties. These properties are primarily derived from the polynomial commitment scheme used in the proof system.
 
 1. **Cryptographic assumption:** Proof systems like FRI-AIR Starks[54], Redshift[54], Fractal[61], Aurora[62] and Ligero[63], that use IOP-based polynomial commitment like FRI, Ligero and Breakdown, are based on weak cryptographic assumption of Collision-Resistant Hash Function. Halo[50], Halo2[51] and Bulletproof[49] systems assume the hardness of solving Discrete Log Problem on the elliptic curve. Similarly, proof systems like Groth16[64], Plonk[65], Sonic[66], Marlin[67] and Slonk[68] are based on stronger cryptographic assumption of the Knowledge of Exponent. In addition to these, there are proof systems like SuperSonic[55] that are based on even stronger assumptions; it assumes Groups of Unknown Order assumption.
 2. **Transparency:** Proof systems like Groth16, Plonk, Sonic and Marlin, that use KZG-based polynomial commitment schemes, requires an initial trusted setup to generate parameters for proof generation and verification. The setup can be performed by a trusted party or through multi-party computation (MPC). For proof systems that use other polynomial commitment schemes, there is no need to perform a trusted setup that generates global parameters using some secrets. These proof systems generate no cryptographic toxic waste.
-3. **Post-quantum security:** FRI, Ligero and Breakdown based proof systems are plausibly post-quantum secure because of their weak cryptographic assumption of Collision-Resistant Hash Function [46]. Rest of the proof systems are not post-quantum secure due to their reliance on the hardness of solving Discrete Log.
+3. **Post-quantum security:** FRI, Ligero and Breakdown based proof systems are plausibly post-quantum secure because of their weak cryptographic assumption of Collision-Resistant Hash Function [46]. Most of the other proof systems are not post-quantum secure due to their reliance on the hardness of solving Discrete Log.
 
-## 5.3 **Proof System for Bitcoin Rollups**
+## **5.3 Proof System for Bitcoin Rollups**
 
-The choice of a proof system for a Bitcoin Rollup requires careful consideration, since the tradeoffs must be consistent with the ecosystem’s core values around decentralization and security. The verification components of the proof system would be part of Bitcoin Core, available to scripts through a proof verification opcode, so there are implementation-level considerations as well. We summarize the core properties of a proof system and the associated verifier implementation for it be a strong choice to use in Bitcoin.
+The choice of a proof system for a Bitcoin Rollup requires careful consideration, since the tradeoffs must be consistent with the ecosystem’s core values around decentralization and security. The verification components of the proof system would be part of Bitcoin Core, available to scripts through a proof verification opcode, so there are implementation-level considerations as well. We summarize the core properties of a proof system and the associated verifier implementation for it to be a strong choice for use in Bitcoin.
 
-1. **Trustless**: no additional cryptographic primitives should be introduced to Bitcoin transactions that require stronger assumptions than the existing ones required for `secp256k1` elliptic curve and the hash functions. The proof system setup should be transparent.
-2. **Generalizable:** the proof system should be sufficiently general to support different rollups and applications of verifiable computation for transactions.
-3. **Efficient:** the verification time should be fast without requiring additional compute resources than already required for a validator node. In addition, verification computation predictability is important. An upper bound on verification time must be enforced.
-4. **Succinct**: the validity proof size should be small in the size of the computation.
-5. **Backwards Compatible:** the verifier and the associated opcode should be introduced to Bitcoin through a soft fork.
+1. **Trustless**: No additional cryptographic primitives should be introduced to Bitcoin transactions that require stronger assumptions than the existing ones required for `secp256k1` elliptic curve and the hash functions. The proof system setup should be transparent.
+2. **Generalizable:** The proof system should be sufficiently general to support different rollups and applications of verifiable computation for transactions.
+3. **Efficient:** The verification time should be fast without requiring additional compute resources than already required for a validator node. In addition, verification computation predictability is important. An upper bound on verification time must be enforced.
+4. **Succinct**: The validity proof size should be small in the size of the computation.
+5. **Backwards Compatible:** The verifier and the associated opcode should be introduced to Bitcoin through a soft fork.
 
 Analyzing the four polynomial commitment schemes described in 5.2.2 against these properties, we found that IPA-based and FRI-based PCS are strongest amongst the choices with respect to trustlessness. While KZG10 PCS based proof system is efficient in verification time and proof size, it requires several new trust assumptions and is less generalizable. Its verifier implementation would also require adding new cryptographic primitives to Bitcoin Core, which makes it a weaker choice.
 
@@ -1007,7 +1010,7 @@ FRI-based PCS was introduced in the first realization of a transparent proof sys
 
 Recent result from Ben-Sasson et al. proposes a solution for generating STARK proof over a much larger finite field [15]. In particular Ben-Sasson et al. show that a STARK proof system can be created with the same prover and verifier asymptotic complexity without needing to use an FFT-friendly prime `p'`. This enables operations for `secp256k1` signature verification in the L2 state transition function to be expressed succinctly within the execution trace. Using this new STARK construction could lead to significantly optimizations in proving time, proof size, and verification time.
 
-## 5.4 **FRI-based Proof System**
+## **5.4 FRI-based Proof System**
 
 Fast Reed-Solomon IOP of Proximity (FRI) is a low-degree testing protocol that tests whether a given function is a polynomial of some bounded degree. Since FRI is based on Reed-Solomon codewords, low-degree testing of polynomial means checking if a given codeword belongs to a polynomial of low degree.
 
@@ -1016,11 +1019,11 @@ FRI-based argument systems are often referred to as STARKS, which stand for Scal
 1. **Scalability**: It constitutes a scalable prover that can generate proof at a running time that is at most quasilinear in the size of the computation and a scalable verifier that can verify the proof at a poly-logarithmic running time.
 2. **Transparency**: There is no need to perform a trusted setup that generates global parameters using some secrets. The proof system generates no cryptographic toxic waste.
 
-## 5.4.2 **Arithmetization and Interpolation**
+## **5.4.2 Arithmetization and Interpolation**
 
 All proof systems begin by arithmetization of the computation to be proven. There are multiple approaches to arithmetization. Plonky2 uses Plonkish arithmetization while FRI-AIR STARK uses Arithmetic Intermediate Representation (AIR). The result of arithmetization is the construction of an arithmetic constraint system [57]. The arithmetic constraint system and the algebraic execution trace of the computation are interpolated to generate constraint polynomials and trace polynomials. The computation was executed correctly if the execution trace satisfies the constraint system or equivalently, if the committed low-degree polynomials, generated through interpolation, are in-fact low-degree polynomials. We transformed our problem from checking the validity of the computation to low-degree testing of polynomials.
 
-## 5.4.3 **Low-degree testing**
+## **5.4.3 Low-degree testing**
 
 Given a function,
 
@@ -1077,7 +1080,7 @@ $$
 f_1(x) = g_0(x) + \alpha_0 h_0(x)
 $$
 
-where $f_1(x)$ is now of degree less than $d/2$ and is defined over $D' = \{x^2: x \in D \}$. Since at each step the degree is halved, repeating this step $\log(d)$ times gives us a final constant polynomial. In order to verify that the prover did not cheat, verifier queries $f_0(z)$ and $f_0(-z)$ at a random sample $z \in D$. Using these two evaluations, verifier can reproduce $g_o(z^2)$ and $h_0(z^2)$ since,
+where $f_1(x)$ is now of degree less than $d/2$ and is defined over $D' = \{x^2: x \in D \}$. Since at each step the degree is halved, repeating this step $\log_2(d)$ times gives us a final constant polynomial. In order to verify that the prover did not cheat, verifier queries $f_0(z)$ and $f_0(-z)$ at a random sample $z \in D$. Using these two evaluations, verifier can reproduce $g_o(z^2)$ and $h_0(z^2)$ since,
 
 $$
 g_0(x^2) = \frac {f_0(x) + f_o(-x)}{2}
@@ -1089,7 +1092,7 @@ $$
 
 Thus after logarithmic queries in the size of $d$, verifier can verify the low-degree claim of the polynomial $f(x)$ of degree less than $d$.
 
-## 5.4.4 **FRI polynomial Commitment Scheme**
+## **5.4.4 FRI polynomial Commitment Scheme**
 
 How is the low-degree testing protocol of FRI converted into a polynomial commitment scheme? Consider a case where a verifier asks prover the evaluation of a committed polynomial $f(X)$ in a given point $z$. The prover claims that $f(z) = y$. Assuming the claim is true, it means $f(X) - y$ must be divisible by $X - z$. The prover can then prove the low-degree of the quotient polynomial:
 
@@ -1099,19 +1102,19 @@ $$
 
 However, if the prover was cheating, then he won’t be able to prove that the quotient polynomial has degree at most $d-1$ since $f(X) - y$ won’t be divisible.
 
-## 5.4.5 **Prover-Verifier Interaction**
+## **5.4.5 Prover-Verifier Interaction**
 
 In the first step of proving the computation, the prover sends the commitments of trace polynomial, composition polynomial and intermediate polynomials of FRI protocol to the verifier. Composition polynomial is a random linear combinations of constraint (boundary and transition) polynomials. The commitments are Merkle root of the evaluation of polynomials in respective domains.
 
-In second step, the verifier makes some random queries. Prover sends the Merkle leafs (polynomial evaluations) and authentication paths against those queries to prove low-degree of polynomials. A non-interactive proof system is obtained through its Fiat-Shamir transformation.
+In second step, the verifier makes some random queries. Prover sends the Merkle leafs (polynomial evaluations) and authentication paths against those queries to prove low-degree of polynomials. This interactive proof system is transformed into a non-interactive proof system through Fiat-Shamir transformation.
 
-# 7 Conclusion
+# **6 Conclusion**
 
 We propose a Layer 2 on Bitcoin which uses a zero-knowledge proof system to add scalability and expressibility to bitcoin transactions without introducing execution complexity on Bitcoin. Our proposed Layer 2 is a ZK Rollup that provides users full ownership, control, and the ability to withdraw funds without requiring any additional trust assumptions beyond those already required by Bitcoin. Our general construction enables many new decentralized financial application for bitcoins that are secured by the Bitcoin consensus protocol.
 
 Our ZK Rollup is secured by a rollup protocol on Bitcoin implemented as a smart contract script inside a P2TR UTXO. We enable the rollup protocol to store state in a novel way within a Taproot address and describe the scripts to verify deposits, withdrawals, and state updates. Our script spending paths are embedded within a Taproot Script Tree, and we use opcodes available in the Elements platform to enable the Rollup UTXO to enforce a recursive convenant. We presented the design for a simple Layer 2 Rollup System capable of handling P2P payments on top of the Bitcoin Rollup Protocol. Finally, we discussed different validity proof systems in the literature and presented our recommendations on the systems suitable for Bitcoin based on their alignment with Bitcoin values. While our current design requires a few changes to Bitcoin Core, such as additional Tapscript opcodes, we believe this is a compelling direction to improve Bitcoin infrastructure without sacrificing decentralization and security of the Bitcoin blockchain.
 
-# 8 References
+# 7 References
 
 <Introduction>
 
@@ -1269,16 +1272,14 @@ Our ZK Rollup is secured by a rollup protocol on Bitcoin implemented as a smart 
 
 [77] [https://github.com/ElementsProject/elements/blob/master/doc/tapscript_opcodes.md](https://github.com/ElementsProject/elements/blob/master/doc/tapscript_opcodes.md)
 
-[78] [https://eips.ethereum.org/EIPS/eip-4337](https://eips.ethereum.org/EIPS/eip-4337)
+[78] [https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki](https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki)
 
-[79] [https://docs.starknet.io/documentation/architecture_and_concepts/Account_Abstraction/introduction/](https://docs.starknet.io/documentation/architecture_and_concepts/Account_Abstraction/introduction/)
+[79] [https://eips.ethereum.org/EIPS/eip-4337](https://eips.ethereum.org/EIPS/eip-4337)
 
-[80] [https://arxiv.org/pdf/2108.05513.pdfïijĽ](https://arxiv.org/pdf/2108.05513.pdfïijĽ)
+[80] [https://docs.starknet.io/documentation/architecture_and_concepts/Account_Abstraction/introduction/](https://docs.starknet.io/documentation/architecture_and_concepts/Account_Abstraction/introduction/)
 
-[81] [https://www.ripublication.com/ijaer17/ijaerv12n19_128.pdf](https://www.ripublication.com/ijaer17/ijaerv12n19_128.pdf)
+[81] [https://arxiv.org/pdf/2108.05513.pdf）](https://arxiv.org/pdf/2108.05513.pdf%EF%BC%89)
 
-[82] [https://gz.blockchair.com/ethereum/transactions/](https://gz.blockchair.com/ethereum/transactions/)
+[82] [https://www.ripublication.com/ijaer17/ijaerv12n19_128.pdf](https://www.ripublication.com/ijaer17/ijaerv12n19_128.pdf)
 
-[83] [https://eprint.iacr.org/2016/263.pdf](https://eprint.iacr.org/2016/263.pdf)
-
-[84] [https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki](https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki)
+[83] [https://gz.blockchair.com/ethereum/transactions/](https://gz.blockchair.com/ethereum/transactions/)
