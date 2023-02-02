@@ -124,7 +124,7 @@ Figure 4 shows an account tree with 8 user accounts, A through H (entire tree no
 <img src="figures/4.png" width="400"/>
 </p>
 
-_Figure 4: For an account tree with 8 accounts, the co-hashes necessary for Merkle proof of account data F are shaded. Only $\textrm{O}(\log_2N)$ co-hashes are needed in a Merkle tree of N accounts. In this example, N=8 and only 3 co-hashes are necessary._
+_Figure 4: For an account tree with 8 accounts, the co-hashes necessary for Merkle proof of account data F are shaded. Only O(log<sub>2</sub>N) co-hashes are needed in a Merkle tree of N accounts. In this example, N=8 and only 3 co-hashes are necessary._
 
 For a Merkle tree with N leaves, the size of the proof is proportional to the height of the Merkle tree which is $\textrm{O}(\log_2N)$. The number of hashes needed to verify the proof, hence the runtime complexity of the verification, is also $\textrm{O}(\log_2N)$.
 
@@ -244,7 +244,7 @@ Each UTXO contains a field called scriptPubKey that specifies the locking script
 <img src="figures/7.png" width="600"/>
 </p>
 
-_Figure 7: This diagram shows the underlying structure of a P2TR address. Details around the public key $q$, internal key $p$, and the construction of the script tree root $m$ are provided in detailed in BIP 341 [72]._
+_Figure 7: This diagram shows the underlying structure of a P2TR address. Details around the public key q, internal key p, and the construction of the script tree root m are provided in detailed in BIP 341 [72]._
 
 The third type of scriptPubKey in SegWit is Pay-to-Taproot (P2TR), shown in Figure 7. It combines the functionality of both the Pay-to-Witness-Public-Key-Hash (P2WPKH) and Pay-to-Witness-Script-Hash (P2WSH) by allowing a UTXO to be spent in either of two ways: by providing a signature from a public key (key path) or by providing the ScriptInputs, RedeemScript, and Control Block to spend from one of the leafs of the Script Tree (script path). Control Block contains the leaf version, internal key, and the Merkle proof cohashes of the spending script.
 
@@ -280,7 +280,7 @@ Introspective opcodes enable Bitcoin scripts to access data on both the UTXO bei
 <img src="figures/8.png" width="600"/>
 </p>
 
-_Figure 8. Introspective Opcodes enable Bitcoin scripts to access data in the UTXO being spent and UTXO being created. Consider the two input, three output transaction shown in this Figure. `OP_INSPECTINPUTVALUE` could push values $A_v$ and $B_v$ to the stack depending on the specified index. Similarly, `OP_INSPECTOUTPUTVALUE` could push values $C_v$, $D_v$, and $E_v$. The introspective scriptPubKey opcodes would enable pushing the scriptPubKey values to the stack similarly._
+_Figure 8. Introspective Opcodes enable Bitcoin scripts to access data in the UTXO being spent and UTXO being created. Consider the two input, three output transaction shown in this Figure. `OP_INSPECTINPUTVALUE` could push values A<sub>v</sub> and B<sub>v</sub> to the stack depending on the specified index. Similarly, `OP_INSPECTOUTPUTVALUE` could push values C<sub>v</sub>, D<sub>v</sub>, and E<sub>v</sub>. The introspective scriptPubKey opcodes would enable pushing the scriptPubKey values to the stack similarly._
 
 **New Validity Proof Verification Opcode**
 
@@ -1043,7 +1043,8 @@ where $h$ is the polynomial interpolated using the $d$-point evaluations of $f$ 
 
 First idea is to have prover and verifier interact with each other without any trust assumptions. A prover can allow a verifier to make queries to polynomials at verifier’s chosen points. However a verifier only makes queries on polynomial commitments, which prevents prover from altering polynomial after receiving the queries. Consider two functions $m(x)$ and $n(x)$ of degree less than $d$ and defined over domain $L$. Naive low-degree testing would require $2(d+1)$ evaluations to prove $m(x)$ and $n(x)$ are polynomials of degree less than $d$.
 
-In a different approach, prover first commits polynomial evaluations: $\{m(x)\}|_{x \in L}$ and $\{n(x)\}|_{x \in L}$. The verifier then selects a random number $\beta$ in $L$, and sends it to the prover. Prover then commits evaluations of
+In a different approach, prover first commits polynomial evaluations: {m(x)} | <sub> x ∈ L</sub> and {n(x)} | <sub>x ∈ L</sub>
+. The verifier then selects a random number $\beta$ in $L$, and sends it to the prover. Prover then commits evaluations of
 
 $$
 k(x) = m(x) + \beta n(x)
