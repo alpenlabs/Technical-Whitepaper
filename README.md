@@ -1271,9 +1271,7 @@ Our ZK Rollup is secured by a rollup protocol on Bitcoin implemented as a smart 
 
 [78] [https://eips.ethereum.org/EIPS/eip-4337](https://eips.ethereum.org/EIPS/eip-4337)
 
-[79] [https://docs.starknet.io/documentation/architecture_and_concepts/Account_Abs
-traction/introduction/](https://docs.starknet.io/documentation/architecture_and_concepts/Account_Abs
-traction/introduction/)
+[79] [https://docs.starknet.io/documentation/architecture_and_concepts/Account_Abstraction/introduction/](https://docs.starknet.io/documentation/architecture_and_concepts/Account_Abstraction/introduction/)
 
 [80] [https://arxiv.org/pdf/2108.05513.pdfïijĽ](https://arxiv.org/pdf/2108.05513.pdfïijĽ)
 
