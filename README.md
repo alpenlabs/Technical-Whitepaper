@@ -22,7 +22,7 @@ In the next section, we discuss other Bitcoin infrastructure work also aimed at 
 
 # **2 Related Work**
 
-In this section, we describe several existing work related to scaling and extending the capabilities of Bitcoin. We discuss their goals, technical constructions, practical tradeoffs, and current limitations. Additionally, we provide a general description of rollups and provide an overview of existing work on rollups in other blockchain ecosystems.
+In this section, we describe several existing works related to scaling and extending the capabilities of Bitcoin. We discuss their goals, technical constructions, practical tradeoffs, and current limitations. Additionally, we provide a general description of rollups and provide an overview of existing work on rollups in other blockchain ecosystems.
 
 ## **2.1 Lightning Network**
 
