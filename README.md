@@ -166,7 +166,7 @@ The Transaction Executor receives the pending block from the Coordinator, execut
 
 ## **3.4 Rollup Assumptions & User Guarantees**
 
-We claim that a rollup can be "trustless” and can “fully inherit” the double spend security from base layer. We will formalize these descriptions as a set of assumptions, which if held as true, leads to a set of guarantees that a rollup can verifiably provide.
+We claim that a rollup can be "trustless” and can “fully inherit” the double spend security from the base layer. We will formalize these descriptions as a set of assumptions, which if held as true, leads to a set of guarantees that a rollup can verifiably provide.
 
 ### **3.4.1 Assumptions**
 
@@ -187,8 +187,8 @@ A properly implemented L2 Rollup System, together with the L1 Rollup Protocol, c
 
 1. **User owned funds on L2 can be transferred, withdrawn, or otherwise change ownership if and only if it is authorized by the user.**
    - To guarantee this using only the prior set of assumptions, the L1 blockchain must validate that any state update on L2 meets this requirement. Note that this verification can be very efficient on L1 because it requires verifying a validity proof of a batch of transactions rather than verifying individual L2 transactions.
-2. **User can unilaterally withdraw all of their available funds on L2 back to any L1 owner.**
-   - The process to withdraw L2 funds without the cooperation of a trusted third party is to construct a proof of ownership of L2 funds and present it to the L1 Rollup Protocol. This means that sufficient data must be made available on L1 Blockchain (”data availability”) to be able to construct and verify a proof of funds ownership.
+2. **User can unilaterally withdraw all of their available funds on L2 back to any L1 address.**
+   - The process to withdraw L2 funds without the cooperation of a trusted third party is to construct a proof of ownership of L2 funds and present it to the L1 Rollup Protocol. This means that sufficient data must be made available on the L1 blockchain (”data availability”) to be able to construct and verify a proof of funds ownership.
    - This can be done if the L2 Rollup Protocol maintains the latest L2 state commitment and enforces that every update to the L2 state commitment must include an associated set of all new state changes. The L1 blockchain must verify that applying the provided set of new state changes will transition the last confirmed L2 state commitment to the newly provided L2 state commitment. Note that this can be verified efficiently on L1 by including that computation in the state transition program with the associated validity proof. Thus, it is sufficient to verify the validity proof to enforce this invariant.
 
 A Rollup System can provide a verifiable guarantee to a user that they can have full ownership, control, and the ability to unilaterally withdraw funds they deposit to the Rollup System. Importantly, these guarantees can be provided without any additional assumptions beyond the ones already required to transact securely on L1. Thus, we conclude that an L2 Rollup System can be trustless and can inherit the security of the L1 blockchain without requiring L1 to execute any L2 transactions.
@@ -196,11 +196,12 @@ A Rollup System can provide a verifiable guarantee to a user that they can have 
 # **4 ZK Rollup on Bitcoin**
 
 In this section, we present our proposed ZK Rollup design for Bitcoin. Though a validity rollup is often referred to as a ZK Rollup, this is often a misnomer as zero-knowledge is a rigorous mathematical property of a proof or an argument that may not be guaranteed by validity proofs used in a rollup construction. We use “ZK Rollup" in our paper as it is used colloquially in industry, defining the zero-knowledge to be the property that the proof of computation integrity can be verified without knowledge of the private inputs used in the computation.
+
 We begin by addressing the technical challenges of implementing a validity rollup on the Bitcoin blockchain, followed by the details of our L1 (Bitcoin) Rollup Protocol and L2 Rollup System designs. Since there are existing L2 Rollup Systems implemented on other blockchains, our primary focus is to provide a detailed design of the Bitcoin Rollup Protocol, while presenting a high level design of the L2 Rollup System that allows smart contract capabilities on top of the L1 Rollup Protocol. Finally, this section brings together all the components of our design from a bird’s eye view and provides a scalability analysis to demonstrate the potential throughput improvements for bitcoin transactions with our proposed design.
 
 ## **4.1 Technical Challenges**
 
-In our design, we implement the L1 Rollup Protocol as a bitcoin UTXO that contains a rollup contract, henceforth referred to as the “Rollup UTXO”. When designing the rollup contract, we face several challenges resulting from Bitcoin’s constrained execution environment and the restricted functionality of its smart contract programming language, Script. We use various strategies to counteract some of these challenges, but others require changes to Bitcoin core. In the meantime, we plan to implement the first version of our proposed design using the Elements framework [75] which already addresses the majority of these limitations.
+In our design, we implement the L1 Rollup Protocol as a bitcoin UTXO that contains a rollup contract, henceforth referred to as the “Rollup UTXO”. When designing the rollup contract, we face several challenges resulting from Bitcoin’s constrained execution environment and the restricted functionality of its smart contract programming language, Script. We use various strategies to counteract some of these challenges, but others require changes to Bitcoin consensus code. In the meantime, we plan to implement the first version of our proposed design using the Elements framework [75] which already addresses the majority of these limitations.
 
 **No persistent storage limits Rollup State storage and propagation.**
 Bitcoin's execution environment doesn't allow persistent storage across transaction executions which prevents the Rollup Protocol from storing or updating the Rollup State. In our design, we have leveraged Bitcoin Taproot upgrade [72] to store state in a novel way which is described in detail in Section 4.2.3. Furthermore, we require that each transaction spending from the Rollup UTXO must include the Rollup State as an input to the rollup contract, and the contract verifies the validity of the input before execution. This mitigates the need for a storage feature within the execution environment because the updated state is passed by the transaction creator with every new transaction. The implementation of this solution is described in detail in Sections 4.2.4, 4.2.5, and 4.2.6.
@@ -244,13 +245,13 @@ Each UTXO contains a field called scriptPubKey that specifies the locking script
 <img src="figures/7.png" width="600"/>
 </p>
 
-_Figure 7: This diagram shows the underlying structure of a P2TR address. Details around the public key q, internal key p, and the construction of the script tree root m are provided in detailed in BIP 341 [72]._
+_Figure 7: This diagram shows the underlying structure of a P2TR address. Details around the public key q, internal key p, and the construction of the script tree root m are provided in BIP 341 [72]._
 
 The third type of scriptPubKey in SegWit is Pay-to-Taproot (P2TR), shown in Figure 7. It combines the functionality of both the Pay-to-Witness-Public-Key-Hash (P2WPKH) and Pay-to-Witness-Script-Hash (P2WSH) by allowing a UTXO to be spent in either of two ways: by providing a signature from a public key (key path) or by providing the ScriptInputs, RedeemScript, and Control Block to spend from one of the leafs of the Script Tree (script path). Control Block contains the leaf version, internal key, and the Merkle proof cohashes of the spending script.
 
 ### **4.2.2 Special Opcodes**
 
-Bitcoin has a limited set of opcodes to program script conditions to spend UTXOs. To implement our L1 Rollup Protocol, we need several additional opcodes for two reasons: we need to enforce a recursive covenant and we need to be able to efficiently verify a validity proof. We can enforce a recursive covenant using a set of introspective opcodes already implemented on Elements [58]. We can efficiently verify validity proofs using a new opcode. Since verification logic is dependent on the proof system used in the rollup, we have proposed an opcode for a FRI-based proof system (e.g. STARK). Section 5.3 explains our rationale for picking FRI-based proof system in our first design iteration.
+Bitcoin has a limited set of opcodes to program script conditions to spend UTXOs. To implement our L1 Rollup Protocol, we need several additional opcodes for two reasons: we need to enforce a recursive covenant and we need to be able to efficiently verify a validity proof. We can enforce a recursive covenant using a set of introspective opcodes already implemented on Elements [58]. We can efficiently verify validity proofs using a new opcode. Since verification logic is dependent on the proof system used in the rollup, we have proposed an opcode for a FRI-based proof system (e.g. STARK). Section 5.3 explains our rationale for picking a FRI-based proof system in our first design iteration.
 
 In addition to these core opcodes, there are several additional opcodes employed in our design that significantly reduce the complexity of our rollup scripts, but these are optional and not strictly required. These optional opcodes are also already implemented on Elements.
 
@@ -349,13 +350,13 @@ $$
 
 Here, $P$ is the Taproot internal key point, $H$ is a point with an unknown discrete logarithm, rollup_state is a bytestring of the _rollup state_ that changes in every new Rollup UTXO, and $G$ is the generator point. We can choose $H=(x,y)$, where $x$ is hash of the standard uncompressed encoding of the `secp256k1` base point $G$, as suggested in BIP 341. Since $\textrm{int}(\textrm{hash}(H\  || \ \textrm{hash}(rollup\_state)))$ is sufficiently random and each TapLeaf script enforces that the internal key for a new Rollup UTXO is computed exactly this way, it can be concluded that $P$ does not have a known discrete logarithm. We use the X-coordinate of $P$ as our internal public key, which serves as the commitment to the _rollup state_.
 
-The L1 Rollup protocol handles three types of transactions: deposit, L2 state update and unilateral withdrawal. In the following sections, we discuss in details the construct of these transactions and the associated scripts in the rollup contract.
+The L1 Rollup protocol handles three types of transactions: deposit, L2 state update and unilateral withdrawal. In the following sections, we discuss in detail the construct of these transactions and the associated scripts in the rollup contract.
 
 ### **4.2.4 Deposit**
 
 Users can deposit funds into the L2 Rollup System by creating a deposit transaction that spends from the Rollup UTXO. The transaction structure of a deposit transaction is shown in Figure 11.
 
-Deposit transaction updates the pending deposit data in the Rollup State and commits this within the internal key of the P2TR scriptPubKey for the new Rollup UTXO. The L2 Rollup System detects the pending deposit transaction in the L1 Mempool and updates the L2 state to include this deposit. The new L2 State Root, containing the deposited funds in the appropriate L2 account, is settled with a state update transaction. Once the state update transaction is confirmed, the deposit is no longer pending and thus will not be tracked in the Rollup State.
+A deposit transaction updates the pending deposit data in the Rollup State and commits this within the internal key of the P2TR scriptPubKey for the new Rollup UTXO. The L2 Rollup System detects the pending deposit transaction in the L1 Mempool and updates the L2 state to include this deposit. The new L2 State Root, containing the deposited funds in the appropriate L2 account, is settled with a state update transaction. Once the state update transaction is confirmed, the deposit is no longer pending and thus will not be tracked in the Rollup State.
 
 <p align="center">
 <img src="figures/11.png" width="600"/>
