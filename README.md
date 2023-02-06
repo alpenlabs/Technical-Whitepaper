@@ -404,7 +404,7 @@ All of these witness fields have a fixed size except for `<deposit_merkle_roots>
 
 ### **4.2.5 L2 State Update**
 
-L2 state update transaction is broadcasted by the L2 Rollup System to propose a new L2 State Root. It includes all withdrawals requested by users in L2. The transaction structure of an L2 state update transaction is shown in Figure 13.
+The L2 state update transaction is broadcast by the L2 Rollup System to propose a new L2 State Root. It includes all withdrawals requested by users in L2. The transaction structure of an L2 state update transaction is shown in Figure 13.
 
 <p align="center">
 <img src="figures/13.png" width="600"/>
