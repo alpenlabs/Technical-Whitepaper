@@ -206,7 +206,7 @@ In our design, we implement the L1 Rollup Protocol as a bitcoin UTXO that contai
 **No persistent storage limits Rollup State storage and propagation.**
 Bitcoin's execution environment doesn't allow persistent storage across transaction executions which prevents the Rollup Protocol from storing or updating the Rollup State. In our design, we have leveraged Bitcoin Taproot upgrade [72] to store state in a novel way which is described in detail in Section 4.2.3. Furthermore, we require that each transaction spending from the Rollup UTXO must include the Rollup State as an input to the rollup contract, and the contract verifies the validity of the input before execution. This mitigates the need for a storage feature within the execution environment because the updated state is passed by the transaction creator with every new transaction. The implementation of this solution is described in detail in Sections 4.2.4, 4.2.5, and 4.2.6.
 
-**Limited programability constrains smart contract functions.**
+**Limited programmability constrains smart contract functions.**
 Script includes a predefined set of instructions called opcodes that are executed within a constrained environment. The program is limited to what is pushed to the stack as inputs when executing the opcodes, and lacks control structures such as loops. Not only does this increase the time for development and testing of smart contracts, but it also makes it impossible to replicate arbitrary logic. For our design, we were successfully able to translate complex Rollup Protocol logic into a construction that can be implemented using opcodes, as described in Sections 4.2.4, 4.2.5, and 4.2.6. We also make use of a few additional opcodes implemented in Elements [77] to reduce code complexity (even though many of these additional opcodes are optional for our design). The Elements opcodes we use are discussed in Section 4.2.2.
 
 **Bitcoin contracts cannot communicate with external systems.**
@@ -501,7 +501,7 @@ To unilaterally withdraw funds from the Rollup UTXO, a user must present a Merkl
 
 ### **4.2.7 Proof Verification Opcode**
 
-We propose to introduce in Bitcoin a verification opcode for FRI-based proof system (STARK). Section 5.4 goes more into the details of FRI-based proof system. The implementation of such verifier requires only the cryptographic assumption of a collision-resistant hash function like SHA256, which is available in Bitcoin. In addition, the verification process is poly-logarithmic with respect to the size of the computation, which translates to under 2 ms for a proof size of about 100 KB [60]. This is what we expect for our rollup design.
+We propose to introduce in Bitcoin a verification opcode for a FRI-based proof system (STARK). Section 5.4 goes more into the details of the FRI-based proof system. The implementation of such verifier requires only the cryptographic assumption of a collision-resistant hash function like SHA256, which is available in Bitcoin. In addition, the verification process is poly-logarithmic with respect to the size of the computation, which translates to under 2 ms for a proof size of about 100 KB [60]. This is what we expect for our rollup design.
 
 We propose `OP_VERIFYSTARKPROOF` opcode to verify a FRI-based proof. It takes as inputs `<stark_proof>, <program_hash>, <stark_input_state>, and <stark_output_state>`. The interface is described in detail in Section [4.2.2](notion://www.notion.so/ZK-Rollup-on-Bitcoin-Technical-Whitepaper-V0-85-Overleaf-65778965e6684683943102d8dc76c109#section_4.2.2).
 
@@ -515,9 +515,9 @@ We propose `OP_VERIFYSTARKPROOF` opcode to verify a FRI-based proof. It takes as
 
 `<stark_output_state>` is the concatenation of the new L2 State Root and the hash of the compressed block data.
 
-The L1 Rollup Protocol constructs the `<stark_output_state>` from the proposed new L2 State Root and the compressed block data committed by the L2 Rollup System along with the proof. This construction ensures that the verifier performs the verification on the committed set of public inputs, and therefore will fail if the proof was generated using different inputs. For example, if the committed set of compressed block data is inconsistent with the block of transactions used to generate the proof, verifier will fail. This ensures the correctness of the witness data posted to L1 blockchain. Also note that the verifier does not need the entire program, but rather only its hash, to be able to verify the accuracy of its execution. This is at the heart of verifiable computation, in which the verifier outsources the computation to the prover but can still verify its correctness without the knowledge of specific details of the computation.
+The L1 Rollup Protocol constructs the `<stark_output_state>` from the proposed new L2 State Root and the compressed block data committed by the L2 Rollup System along with the proof. This construction ensures that the verifier performs the verification on the committed set of public inputs, and therefore will fail if the proof was generated using different inputs. For example, if the committed set of compressed block data is inconsistent with the block of transactions used to generate the proof, the verifier will fail. This ensures the correctness of the witness data posted to the L1 blockchain. Also note that the verifier does not need the entire program, but rather only its hash, to be able to verify the accuracy of its execution. This is at the heart of verifiable computation, in which the verifier outsources the computation to the prover but can still verify its correctness without the knowledge of specific details of the computation.
 
-`OP_VERIFYSTARKPROOF` executes STARK verification protocol using the `<stark_proof>` and public inputs (`<program hash>`, `<stark_input_state>` and `<stark_output_state>`). It pushes `True` in the stack if the verification is successful and `False` if the verification fails. Internally, `OP_VERIFYSTARKPROOF` uses a fixed arithmetization scheme that encodes the constraints of a general zkVM execution stack. The Prover in L2 Rollup System uses the same arithmetization to generate the validity proof. We do not discuss in detail the design of such scheme in this paper. However, we address potential options for Bitcoin in Sections 5.3 and 5.4.
+`OP_VERIFYSTARKPROOF` executes the STARK verification protocol using the `<stark_proof>` and public inputs (`<program hash>`, `<stark_input_state>` and `<stark_output_state>`). It pushes `True` in the stack if the verification is successful and `False` if the verification fails. Internally, `OP_VERIFYSTARKPROOF` uses a fixed arithmetization scheme that encodes the constraints of a general zkVM execution stack. The Prover in L2 Rollup System uses the same arithmetization to generate the validity proof. We do not discuss in detail the design of such scheme in this paper. However, we address potential options for Bitcoin in Sections 5.3 and 5.4.
 
 ## **4.3 Layer 2 Rollup System**
 
@@ -592,7 +592,7 @@ A non-user-owned contract is deployed by a user with an existing account in the 
 
 **Special Coordinator Smart Contract**
 
-The L2 Rollup System contains a privileged, global smart contract account deployed by the rollup coordinator that defines transactions like create_account, transfer and withdraw. This smart contract is capable of calling the system functions that update the global L2 State Tree, while all other smart contracts can only change their own state. When a user wants to transfer bitcoin to another contract account or withdraw bitcoins from L2, they interact with this smart contract. This is a design chosen to abstract the transaction execution functions from system layer to contract layer, aligning with the idea of account abstraction. The interface of this special contract is as follows:
+The L2 Rollup System contains a privileged, global smart contract account deployed by the rollup coordinator that defines transactions like `create_account`, `transfer` and `withdraw`. This smart contract is capable of calling the system functions that update the global L2 State Tree, while all other smart contracts can only change their own state. When a user wants to transfer bitcoins to another contract account or withdraw bitcoins from L2, they interact with this smart contract. This is a design chosen to abstract the transaction execution functions from system layer to contract layer, aligning with the idea of account abstraction. The interface of this special contract is as follows:
 
 ```
 # Transfer bitcoin to another contract. If the receiving contract is not
@@ -615,10 +615,10 @@ An L2 transaction is initiated by a user-owned contract account. Each transactio
 
 sender # L1 pubkey of sender
 call_data # Contains the information on the target contract address and the target function to call along with its arguments. (For Deploy transaction, encodes entire smart contract code bytes).
-nonce # this should be equal to the nonce of the sender account. During transaction execution, the sender account's nonce gets incremented, and the next transaction will be required to have different nonce.
+nonce # this should be equal to the nonce of the sender account. During transaction execution, the sender account's nonce gets incremented, and the next transaction will be required to have a different nonce.
 ```
 
-There are two types of L2 transactions: a Deploy transaction when a user wants to deploy a new smart contract and an Invoke transaction when a user wants to call a particular function of an external smart contract. To perform a simple transfer to another account (”transfer transaction”) or to withdraw funds (”withdrawal transaction”), user creates an Invoke transaction targeting the coordinator smart contract described in Section 4.3.1.2 and the appropriate function to run.
+There are two types of L2 transactions: a Deploy transaction when a user wants to deploy a new smart contract and an Invoke transaction when a user wants to call a particular function of an external smart contract. To perform a simple transfer to another account (”transfer transaction”) or to withdraw funds (”withdrawal transaction”), the user creates an Invoke transaction targeting the coordinator smart contract described in Section 4.3.1.2 and the appropriate function to run.
 
 | Transaction Type | Properties                                                                             | Intent                                                                    |
 | ---------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
@@ -657,7 +657,7 @@ The withdrawals data do not include the unilateral withdrawals initiated in L1, 
 <img src="figures/15.png" width="600"/>
 </p>
 
-_Figure 15: Compressed block data is sent as a byte string that starts with a header that describe the contents of the data and is followed by the Deposit, State Diff, and Withdrawals. Unilateral Withdrawal transactions are not present in the compressed block data as they are already available on L1, hence they are not a requirement for data availability._
+_Figure 15: Compressed block data is sent as a byte string that starts with a header that describes the contents of the data and is followed by the Deposit, State Diff, and Withdrawals. Unilateral Withdrawal transactions are not present in the compressed block data as they are already available on L1, hence they are not a requirement for data availability._
 
 **State Diff**
 
@@ -724,7 +724,7 @@ A Rollup Coordinator is responsible for accepting and validating transactions, a
 <img src="figures/16.png" width="800"/>
 </p>
 
-_Figure 16: Rollup Coordinator includes the Rollup Service, L1 Watcher, L2 Mempool, and the Block Producer. The L2 Mempool holds queues that store incoming transactions in the Rollup layer. The Rollup Service is an RPC interface that allows L2 users to submit transactions. The L1 Watcher facilitates communication between the Bitcoin Layer and the Rollup layer. Block Producer validates L2 blocks and initiates L2 State Update transactions._
+_Figure 16: Rollup Coordinator includes the Rollup Service, L1 Watcher, L2 Mempool, and the Block Producer. The L2 Mempool holds queues that store incoming transactions in the Rollup layer. The Rollup Service is an RPC interface that allows L2 users to submit transactions. The L1 Watcher facilitates communication between the Bitcoin Layer and the Rollup layer. The Block Producer validates L2 blocks and initiates L2 State Update transactions._
 
 ### **4.3.2.1 Rollup Service and L1 Watcher**
 
@@ -732,7 +732,7 @@ Rollup Service and L1 Watcher are components responsible for populating the L2 M
 
 Rollup Service is a user-facing component that accepts L2 transactions created by users through a Remote Procedure Call (RPC) or a REST API. It validates these transactions against basic validation rules such as checking syntax, transaction structure, and the signatures. It also runs the `validate()` function in sender’s account for each transaction. Once the basic validation is complete, the Rollup Service adds the transactions to the L2 Mempool in a L2 Transaction Queue, in the order that they were received.
 
-The L1 Watcher monitors the L1 Mempool for L1 Rollup Transactions using bitcoin’s RPC interface. It stores these L1 transactions (deposit and unilateral_withdrawal) in the L1 Transaction Queue in L2 Mempool and constantly updates this queue with the latest rollup transactions in the L1 Mempool. Since these transactions are validated in L1, they do not require additional validation.
+The L1 Watcher monitors the L1 Mempool for L1 Rollup Transactions using Bitcoin’s RPC interface. It stores these L1 transactions (deposit and unilateral_withdrawal) in the L1 Transaction Queue in L2 Mempool and constantly updates this queue with the latest rollup transactions in the L1 Mempool. Since these transactions are validated in L1, they do not require additional validation.
 
 ### **4.3.2.2 Block Producer**
 
@@ -750,7 +750,7 @@ While the Executor and the Prover System generate the validity proof, the Block 
 <img src="figures/17.png" width="600"/>
 </p>
 
-_Figure 17: The L2 State Update Transaction Witness includes the `stark_proof` that will be verified by the Rollup Protocol and `new_L2_state_root` as commitment to the L2 state. The `compressed_block_data` provide data availability such that any rollup user can recreate the L2 accounts state tree to generate a Merkle proof for their unilateral withdrawal transaction or simply to verify valid state transitions in L2._
+_Figure 17: The L2 State Update Transaction Witness includes the `stark_proof` that will be verified by the Rollup Protocol and the `new_L2_state_root` as the commitment to the L2 state. The `compressed_block_data` provide data availability such that any rollup user can recreate the L2 accounts state tree to generate a Merkle proof for their unilateral withdrawal transaction or simply to verify valid state transitions in L2._
 
 **Update Inputs**
 
@@ -770,7 +770,7 @@ In addition to the `<update_inputs>`, the L2 State Update witness also requires 
 
 <u>Rollup UTXO:</u> The Block producer generates the scriptPubKey for the Rollup UTXO by performing the TapTweak hash [84] with the `<new_internal_key>` and the root of the P2TR script tree, which is a known constant.
 
-<u>Withdrawal UTXOs:</u> The Block Producer now needs to construct the list of withdrawals from the rollup that needs to be part of the outputs of State Update transaction. To do this, the Block Producer iterates over all the withdrawal transactions in the pending block and constructs an output with the requested amount and a scriptPubKey according to the user’s specification, most likely a P2PKH with the user’s L1 public key.
+<u>Withdrawal UTXOs:</u> The Block Producer now needs to construct the list of withdrawals from the rollup that needs to be part of the outputs of the State Update transaction. To do this, the Block Producer iterates over all the withdrawal transactions in the pending block and constructs an output with the requested amount and a scriptPubKey according to the user’s specification, most likely a P2PKH with the user’s L1 public key.
 
 The Block Producer now has everything that it needs to broadcast an L2 State Update transaction in L1. When it receives the proof, the Block Producer broadcasts the State Update transaction, using as parent the last transaction in the L1 Transaction Queue. Once the L2 State Update Transaction is confirmed on L1, the Block Producer updates the last confirmed L2 State Tree and adds the pending block to the L2 blockchain. This officially marks this block as confirmed.
 
@@ -788,7 +788,7 @@ _Figure 18: Transaction Executor interacts with the Prover and the Rollup Coordi
 
 **Fixed State Transition Program**
 
-The Fixed State Transition Program is a fixed, publicly auditable program that defines the state transition rules in our L2 Rollup System. This program runs inside a VM environment on a set of transactions (called “block”), and incrementally updates the L2 State Tree as it executes the transactions in the block. Assuming a stack-based VM, the program expects the L2 State Root to be the only item on the stack at the start of execution and leaves the updated L2 State Root as the only remaining item on the stack upon completion. The program has access to the entire L2 State Tree and the pending block containing data of all transactions to be executed, which are stored in the VM environment's RAM.
+The Fixed State Transition Program is a fixed, publicly auditable program that defines the state transition rules in our L2 Rollup System. This program runs inside a VM environment on a set of transactions (called a “block”), and incrementally updates the L2 State Tree as it executes the transactions in the block. Assuming a stack-based VM, the program expects the L2 State Root to be the only item on the stack at the start of execution and leaves the updated L2 State Root as the only remaining item on the stack upon completion. The program has access to the entire L2 State Tree and the pending block containing data of all transactions to be executed, which are stored in the VM environment's RAM.
 
 Each transaction in the pending block contains the witness information (such as signatures) necessary for its execution. If a transaction fails during execution, it is removed from the pending block and the program continues executing the rest of the transactions. The updated pending block is accessible to both the Rollup Coordinator and the Transaction Executor.
 
