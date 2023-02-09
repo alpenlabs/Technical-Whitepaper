@@ -936,88 +936,88 @@ Moreover, there are two notions to the definition of soundness:
 1. **Statistical (informational-theoretical) soundness:** A proof system is statistically sound if soundness holds for any unbounded cheating prover.
 2. **Computational soundness:** A proof system is computationally sound if soundness holds for only computationally bounded prover.
 
-A computationally sound interactive proof system is defined as an _argument system_. This means in an argument system, a prover is polynomially-bounded and does not poses infinite computational power. In recent years, these argument systems have been used as a tool in cryptographic protocols of real-world systems. Because of their practical usage, these argument systems are often simply referred to as proof systems.
+A computationally sound interactive proof system is defined as an _argument system_. This means in an argument system, a prover is polynomially-bounded and does not possess infinite computational power. In recent years, these argument systems have been used as a tool in cryptographic protocols of real-world systems. Because of their practical usage, these argument systems are often simply referred to as proof systems.
 
-Argument systems are designed using two mathematical building blocks. The first part is an information-theoretic protocol such as interactive proof (IP), probabilistically checkable proof (PCP) or interactive oracle proof (IOP). These protocols are then combined with cryptographic techniques like polynomial commitment scheme (PCS) and Fiat-Shamir transformation to generate the argument system. The fusion of cryptography gives rise to very useful properties like non-interactivity, succinctness and zero-knowledge. An argument system with all three properties is known as zk-SNARK: Zero-knowledge-Succint Non-interactive ARgument of Knowledge.
+Argument systems are designed using two mathematical building blocks. The first part is an information-theoretic protocol such as interactive proof (IP), probabilistically checkable proof (PCP), or interactive oracle proof (IOP). These protocols are then combined with cryptographic techniques like a polynomial commitment scheme (PCS) and Fiat-Shamir transformation to generate the argument system. The fusion of cryptography gives rise to very useful properties like non-interactivity, succinctness, and zero-knowledge. An argument system with all three properties is known as a zk-SNARK: Zero-knowledge-Succint Non-interactive ARgument of Knowledge.
 
 An argument system is zero-knowledge if the prover can prove a claim to the verifier without revealing any information in the process. The verifier gains no additional information beyond just the fact that the claim is true. The notion of zero-knowledge proof was first introduced in 1985 by MIT researchers, where they gave the very first zero-knowledge proof of a well-defined problem [45].
 
 ## **5.2 Proof Systems**
 
-The development of recent proof systems has been fueled by two fundamental problems of the decentralized blockchain: privacy and scalability. proof systems achieved privacy by shielding the inputs of the computation (zero-knowledge proofs) and scalability by generating a succinctly verifiable proof of computation. Most modern proof systems are built using polynomial IOP as the information-theoretic part and a polynomial commitment scheme as the cryptographic primitive [46]. Interactive oracle proof (IOP) is an interactive proof (IP) where the verifier does not have to read the prover’s entire message. The verifier can randomly query the prover’s messages, which are polynomials defined over a finite field. Polynomial IOP generates the polynomial constraints from the computation and the polynomial commitment scheme is used to prove that the polynomial constraints are satisfied.
+The development of recent proof systems has been fueled by two fundamental problems of the decentralized blockchain: privacy and scalability. Proof systems achieved privacy by shielding the inputs of the computation (zero-knowledge proofs) and scalability by generating a succinctly verifiable proof of computation. Most modern proof systems are built using polynomial IOP as the information-theoretic part and a polynomial commitment scheme as the cryptographic primitive [46]. Interactive oracle proof (IOP) is an interactive proof (IP) where the verifier does not have to read the prover’s entire message. The verifier can randomly query the prover’s messages, which are polynomials defined over a finite field. Polynomial IOP generates the polynomial constraints from the computation and the polynomial commitment scheme is used to prove that the polynomial constraints are satisfied.
 
-In what follows, we will discuss in details the workflow of generating the proof by any polynomial IOP based proof system. Figure 20 shows key steps involved in the process.
+In what follows, we will discuss in detail the workflow of generating the proof using any polynomial IOP-based proof system. Figure 20 shows the key steps involved in the process.
 
 <p align="center">
 <img src="figures/20.png" width="700"/>
 </p>
 
-_Figure 20: The figure above shows the proof generation step in the a polynomial IOP based proof system. A computation is arithmetized to obtain a constraints system. Polynomial interpolation of the system leads to an abstract protocol we call Polynomial IOP. It is then cryptographically compiled with polynomial commitment scheme and Fiat-Shamir transformation to obtain a non-interactive proof system._
+_Figure 20: The figure above shows the proof generation step in a polynomial IOP-based proof system. A computation is arithmetized to obtain a constraint system. Polynomial interpolation of the system leads to an abstract protocol we call Polynomial IOP. It is then cryptographically compiled with a polynomial commitment scheme and Fiat-Shamir transformation to obtain a non-interactive proof system._
 
 ### **5.2.1 Arithmetization, Interpolation and Polynomial IOP**
 
-As a first step, a proof system needs some way to represent the computation. Computers represent programs in machine language with operations over registers and memory and these operations are carried out in bits. However, for a proof system to generate succinct proof of computation, nice error correcting properties of polynomials can be used. In order to compute these polynomials, the computation to be proven is first converted into a system of constraints. These are basically equations with coefficients and variables defined over a finite field. This transformation of problem from the computation/circuit space to polynomial space is called the arithmetization.
+As a first step, a proof system needs some way to represent the computation. Computers represent programs in machine language with operations over registers and memory and these operations are carried out in bits. However, for a proof system to generate succinct proof of computation, nice error correcting properties of polynomials can be used. In order to compute these polynomials, the computation to be proven is first converted into a system of constraints. These are basically equations with coefficients and variables defined over a finite field. This transformation of a problem from the computation/circuit space to polynomial space is called arithmetization.
 
-There are multiple approaches to generating such constraint systems. R1CS (Rank 1 Constraint Satisfiability), AIR (Algebraic Intermediate Representation) and Plonkish arithmetization like Plonk, TurboPlonk and UltraPlonk are some of the most used methods.
+There are multiple approaches to generating such constraint systems. R1CS (Rank 1 Constraint Satisfiability), AIR (Algebraic Intermediate Representation), and Plonkish arithmetization like Plonk, TurboPlonk, and UltraPlonk are some of the most used methods.
 
-Through interpolation, the system of constraints are converted into low-degree univariate polynomials that the prover can send to the verifier as part of the polynomial IOP. Verifier can then make random queries to the oracle to validate the proof. To make the proof system non-interactive and efficient, it is cryptographically compiled using polynomial commitment scheme and Fiat-Shamir transformation.
+Through interpolation, the system of constraints are converted into low-degree univariate polynomials that the prover can send to the verifier as part of the polynomial IOP. The verifier can then make random queries to the oracle to validate the proof. To make the proof system non-interactive and efficient, it is cryptographically compiled using a polynomial commitment scheme and Fiat-Shamir transformation.
 
 ### **5.2.2 Polynomial Commitment Schemes**
 
-Commitment schemes are the building blocks of many cryptographic protocols. A commitment scheme allows a committer to publish a value which binds the committer to the original message without revealing it. A polynomial commitment scheme allows prover to commit to a polynomial with one property: it can later be opened to show that the value of the polynomial at a certain point is equal to the claimed value.
+Commitment schemes are the building blocks of many cryptographic protocols. A commitment scheme allows a committer to publish a value which binds the committer to the original message without revealing it. A polynomial commitment scheme allows a prover to commit to a polynomial with one property: it can later be opened to show that the value of the polynomial at a certain point is equal to the claimed value.
 
-Polynomial commitment scheme (PCS) used in the polynomial IOP based proof system defines much of its characteristics and limitations. It plays a dominant role in defining proof generating time, proof length and verification time as well as the underlying cryptographic assumption, transparency and the security of the proof system. While many polynomial commitment scheme have been developed over the last few years, below are some of the most common schemes.
+The polynomial commitment scheme (PCS) used in the polynomial IOP based proof system defines much of its characteristics and limitations. It plays a dominant role in defining proof generating time, proof length, and verification time, as well as the underlying cryptographic assumption, transparency and the security of the proof system. While many polynomial commitment schemes have been developed over the last few years, below are some of the most common schemes.
 
-1. **Kate (KZG10) PCS:** It is a polynomial commitment scheme that makes use of the elliptic curve pairings. It constructs commitments using a structured reference string (SRS), which is generated using two bilinear curves, during the initial trusted setup phase [47].
+1. **Kate (KZG10) PCS:** It is a polynomial commitment scheme that makes use of elliptic curve pairings. It constructs commitments using a structured reference string (SRS), which is generated using two bilinear curves, during the initial trusted setup phase [47].
 2. **IPA-based PCS:** It is a polynomial commitment scheme based on the inner product arguments [48]. The concept of the inner product argument was introduced by Bootle [et.al](http://et.al) and was later optimized on the Bulletproof paper [49]. Halo [50] and Halo2 [51] further expanded its capabilities by using different arithmetization.
-3. **FRI-based PCS:** FRI is a hash function based commitment scheme that performs a low-degree check on the committed polynomials. STARK proof systems [52], Plonky2 [53] and RedShift [54] uses FRI commitment scheme for its transparent setup and proof composition.
-4. **DARK PCS:** Diophantine argument of knowledge is a polynomial commitment scheme based on the groups of unknown order. The commitment scheme is used in SuperSonic proof system to create a transparent zk-SNARK protocol [55].
+3. **FRI-based PCS:** FRI is a hash function based commitment scheme that performs a low-degree check on the committed polynomials. STARK proof systems [52], Plonky2 [53], and RedShift [54] use FRI commitment schemes for their transparent setup and proof composition.
+4. **DARK PCS:** Diophantine argument of knowledge is a polynomial commitment scheme based on the groups of unknown order. The commitment scheme is used in the SuperSonic proof system to create a transparent zk-SNARK protocol [55].
 
 ### **5.2.3 Non-Interactive Proof using Fiat-Shamir Transformation**
 
 While interactive proof systems laid the foundation for modern proofs systems, they are not well suited for practical applications because of the liveliness and interactivity required for both the prover and verifier.
 
-Fiat and Shamir in 1980s introduced a heuristic technique to convert a $\Sigma$-protocol, a public-coin interactive proof system, into a non-interactive zero-knowledge proof system [56]. $\Sigma$-protocol consists of three message exchanges between the public-coin honest verifier and the prover:
+Fiat and Shamir in the 1980s introduced a heuristic technique to convert a $\Sigma$-protocol, a public-coin interactive proof system, into a non-interactive zero-knowledge proof system [56]. $\Sigma$-protocol consists of three message exchanges between the public-coin honest verifier and the prover:
 
 1. A commit message from the prover to the verifier.
 2. A uniformly sampled challenge $e$ from the verifier to the prover.
-3. An answer $f(w, r, e)$ from the prover to the verifier, where $f$ is a public function and $w$ is the witness known to only prover.
+3. An answer $f(w, r, e)$ from the prover to the verifier, where $f$ is a public function and $w$ is the witness known only to the prover.
 
-Using cryptographic hash function as a random oracle model, Fiat-Shamir transformation reduces the interactions to a single message from the prover to the verifier. Random oracle model (ROM) is a theoretical model that assumes the existence of a truly random function accessible to all parties. Most modern proof systems are polynomial IOP based and use this transformation to achieve a non-interactive protocol.
+Using a cryptographic hash function as a random oracle model, Fiat-Shamir transformation reduces the interactions to a single message from the prover to the verifier. The random oracle model (ROM) is a theoretical model that assumes the existence of a truly random function accessible to all parties. Most modern proof systems are polynomial IOP based and use this transformation to achieve a non-interactive protocol.
 
 ### **5.2.4 Characteristics of various proof systems**
 
 We can categorize proof systems based on three key properties. These properties are primarily derived from the polynomial commitment scheme used in the proof system.
 
-1. **Cryptographic assumption:** Proof systems like FRI-AIR Starks[54], Redshift[54], Fractal[61], Aurora[62] and Ligero[63], that use IOP-based polynomial commitment like FRI, Ligero and Breakdown, are based on weak cryptographic assumption of Collision-Resistant Hash Function. Halo[50], Halo2[51] and Bulletproof[49] systems assume the hardness of solving Discrete Log Problem on the elliptic curve. Similarly, proof systems like Groth16[64], Plonk[65], Sonic[66], Marlin[67] and Slonk[68] are based on stronger cryptographic assumption of the Knowledge of Exponent. In addition to these, there are proof systems like SuperSonic[55] that are based on even stronger assumptions; it assumes Groups of Unknown Order assumption.
-2. **Transparency:** Proof systems like Groth16, Plonk, Sonic and Marlin, that use KZG-based polynomial commitment schemes, requires an initial trusted setup to generate parameters for proof generation and verification. The setup can be performed by a trusted party or through multi-party computation (MPC). For proof systems that use other polynomial commitment schemes, there is no need to perform a trusted setup that generates global parameters using some secrets. These proof systems generate no cryptographic toxic waste.
-3. **Post-quantum security:** FRI, Ligero and Breakdown based proof systems are plausibly post-quantum secure because of their weak cryptographic assumption of Collision-Resistant Hash Function [46]. Most of the other proof systems are not post-quantum secure due to their reliance on the hardness of solving Discrete Log.
+1. **Cryptographic assumption:** Proof systems like FRI-AIR STARKs[54], Redshift[54], Fractal[61], Aurora[62], and Ligero[63], that use IOP-based polynomial commitment schemes like FRI, Ligero, and Breakdown, are based on the weak cryptographic assumption of Collision-Resistant Hash Function. Halo[50], Halo2[51], and Bulletproof[49] systems assume the hardness of solving the Discrete Log Problem on the elliptic curve. Similarly, proof systems like Groth16[64], Plonk[65], Sonic[66], Marlin[67], and Slonk[68] are based on the stronger cryptographic assumption of the Knowledge of Exponent. In addition to these, there are proof systems like SuperSonic[55] that are based on even stronger assumptions; they rely on the Groups of Unknown Order assumption.
+2. **Transparency:** Proof systems like Groth16, Plonk, Sonic, and Marlin, that use KZG-based polynomial commitment schemes, require an initial trusted setup to generate parameters for proof generation and verification. The setup can be performed by a trusted party or through multi-party computation (MPC). For proof systems that use other polynomial commitment schemes, there is no need to perform a trusted setup that generates global parameters using some secrets. These proof systems generate no cryptographic toxic waste.
+3. **Post-quantum security:** FRI-, Ligero-, and Breakdown-based proof systems are plausibly post-quantum secure because of their weak cryptographic assumption of Collision-Resistant Hash Function [46]. Most of the other proof systems are not post-quantum secure due to their reliance on the hardness of solving Discrete Log.
 
 ## **5.3 Proof System for Bitcoin Rollups**
 
 The choice of a proof system for a Bitcoin Rollup requires careful consideration, since the tradeoffs must be consistent with the ecosystem’s core values around decentralization and security. The verification components of the proof system would be part of Bitcoin Core, available to scripts through a proof verification opcode, so there are implementation-level considerations as well. We summarize the core properties of a proof system and the associated verifier implementation for it to be a strong choice for use in Bitcoin.
 
-1. **Trustless**: No additional cryptographic primitives should be introduced to Bitcoin transactions that require stronger assumptions than the existing ones required for `secp256k1` elliptic curve and the hash functions. The proof system setup should be transparent.
+1. **Trustless**: No additional cryptographic primitives should be introduced to Bitcoin transactions that require stronger assumptions than the existing assumptions required for the `secp256k1` elliptic curve and hash functions already used in Bitcoin. The proof system setup should be transparent.
 2. **Generalizable:** The proof system should be sufficiently general to support different rollups and applications of verifiable computation for transactions.
-3. **Efficient:** The verification time should be fast without requiring additional compute resources than already required for a validator node. In addition, verification computation predictability is important. An upper bound on verification time must be enforced.
+3. **Efficient:** The verification time should be fast without requiring more compute resources than are already required for a validator node. In addition, verification computation predictability is important. An upper bound on verification time must be enforced.
 4. **Succinct**: The validity proof size should be small in the size of the computation.
 5. **Backwards Compatible:** The verifier and the associated opcode should be introduced to Bitcoin through a soft fork.
 
-Analyzing the four polynomial commitment schemes described in 5.2.2 against these properties, we found that IPA-based and FRI-based PCS are strongest amongst the choices with respect to trustlessness. While KZG10 PCS based proof system is efficient in verification time and proof size, it requires several new trust assumptions and is less generalizable. Its verifier implementation would also require adding new cryptographic primitives to Bitcoin Core, which makes it a weaker choice.
+Analyzing the four polynomial commitment schemes described in 5.2.2 against these properties, we found that IPA-based and FRI-based PCS are strongest amongst the choices with respect to trustlessness. While a KZG10 PCS-based proof system is efficient in verification time and proof size, it requires several new trust assumptions and is less generalizable. Its verifier implementation would also require adding new cryptographic primitives to Bitcoin Core, which makes it a weaker choice.
 
-We conclude that FRI-based PCS is the strongest option to use in a proof system for Bitcoin. While IPA-based PCS could be compatible with the existing cryptographic primitives on Bitcoin, the proof verification time would be prohibitively expensive for Bitcoin validators. In comparison, FRI-based PCS allows for verification times to be on the order of milliseconds. High parallelizability of proof generation steps also allows for fast proof composition. Additionally, the proof system can be post-quantum secure, with a verifier that is generalizable, succinct, and backwards compatible.
+We conclude that FRI-based PCS is the strongest option to use in a proof system for Bitcoin. While IPA-based PCS could be compatible with the existing cryptographic primitives in Bitcoin, the proof verification time would be prohibitively expensive for Bitcoin validators. In comparison, FRI-based PCS allows for verification times to be on the order of milliseconds. High parallelizability of proof generation steps also allows for fast proof composition. Additionally, the proof system can be post-quantum secure, with a verifier that is generalizable, succinct, and backwards compatible.
 
 FRI-based PCS was introduced in the first realization of a transparent proof system, called STARK[54]. While STARK used AIR (Algebraic Intermediate Representation) as the arithmetization technique, recently Plonky2 and RedShift proof systems have incorporated Plonkish arithmetization with FRI-based PCS for fast recursive proof composition. These proof systems currently require expressing computation as polynomials over a finite field with an FFT-friendly prime `p'`. Thus, for Bitcoin signature verification and related operations, the proof system must simulate finite field arithmetic of the Bitcoin `secp256k1` prime `p` in its own finite field. This results in a large execution trace, proof size, and inefficient Rollup State transition proof verification.
 
-Recent result from Ben-Sasson et al. proposes a solution for generating STARK proof over a much larger finite field [15]. In particular Ben-Sasson et al. show that a STARK proof system can be created with the same prover and verifier asymptotic complexity without needing to use an FFT-friendly prime `p'`. This enables operations for `secp256k1` signature verification in the L2 state transition function to be expressed succinctly within the execution trace. Using this new STARK construction could lead to significantly optimizations in proving time, proof size, and verification time.
+A recent result from Ben-Sasson et al. proposes a solution for generating a STARK proof over a much larger finite field [15]. In particular Ben-Sasson et al. show that a STARK proof system can be created with the same prover and verifier asymptotic complexity without needing to use an FFT-friendly prime `p'`. This enables operations for `secp256k1` signature verification in the L2 state transition function to be expressed succinctly within the execution trace. Using this new STARK construction could lead to significant optimizations in proving time, proof size, and verification time.
 
 ## **5.4 FRI-based Proof System**
 
 Fast Reed-Solomon IOP of Proximity (FRI) is a low-degree testing protocol that tests whether a given function is a polynomial of some bounded degree. Since FRI is based on Reed-Solomon codewords, low-degree testing of polynomial means checking if a given codeword belongs to a polynomial of low degree.
 
-FRI-based argument systems are often referred to as STARKS, which stand for Scalable Transparent ARgument of Knowledge. It is an argument system with two key properties [52]:
+FRI-based argument systems are often referred to as STARKs, which stand for Scalable Transparent ARgument of Knowledge. It is an argument system with two key properties [52]:
 
-1. **Scalability**: It constitutes a scalable prover that can generate proof at a running time that is at most quasilinear in the size of the computation and a scalable verifier that can verify the proof at a poly-logarithmic running time.
+1. **Scalability**: It constitutes a scalable prover that can a generate proof at a running time that is at most quasilinear in the size of the computation and a scalable verifier that can verify the proof at a poly-logarithmic running time.
 2. **Transparency**: There is no need to perform a trusted setup that generates global parameters using some secrets. The proof system generates no cryptographic toxic waste.
 
 ## **5.4.2 Arithmetization and Interpolation**
@@ -1042,18 +1042,18 @@ $$
 
 where $h$ is the polynomial interpolated using the $d$-point evaluations of $f$ and $z$ is another random point in $F$. However, since the degree $d$ is very large in practice, evaluating $d+1$ queries would be too expensive. FRI protocol solves this problem by combining two fundamental ideas.
 
-First idea is to have prover and verifier interact with each other without any trust assumptions. A prover can allow a verifier to make queries to polynomials at verifier’s chosen points. However a verifier only makes queries on polynomial commitments, which prevents prover from altering polynomial after receiving the queries. Consider two functions $m(x)$ and $n(x)$ of degree less than $d$ and defined over domain $L$. Naive low-degree testing would require $2(d+1)$ evaluations to prove $m(x)$ and $n(x)$ are polynomials of degree less than $d$.
+The first idea is to have a prover and verifier interact with each other without any trust assumptions. A prover can allow a verifier to make queries to polynomials at the verifier’s chosen points. However a verifier only makes queries on polynomial commitments, which prevents the prover from altering polynomial after receiving the queries. Consider two functions $m(x)$ and $n(x)$ of degree less than $d$ and defined over domain $L$. Naive low-degree testing would require $2(d+1)$ evaluations to prove $m(x)$ and $n(x)$ are polynomials of degree less than $d$.
 
-In a different approach, prover first commits polynomial evaluations: {m(x)} | <sub> x ∈ L</sub> and {n(x)} | <sub>x ∈ L</sub>
-. The verifier then selects a random number $\beta$ in $L$, and sends it to the prover. Prover then commits evaluations of
+In a different approach, the prover first commits polynomial evaluations: {m(x)} | <sub> x ∈ L</sub> and {n(x)} | <sub>x ∈ L</sub>
+. The verifier then selects a random number $\beta$ in $L$, and sends it to the prover. The prover then commits evaluations of
 
 $$
 k(x) = m(x) + \beta n(x)
 $$
 
-on the domain $L$. Verifier can now simply check that $k(x)$ has degree less than $d$ using only $d+1$ evaluations. While this does not guarantee that the polynomial $k(x)$ will have degree less than $d$, the error is however negligible for large field $F$.
+on the domain $L$. The verifier can now simply check that $k(x)$ has degree less than $d$ using only $d+1$ evaluations. While this does not guarantee that the polynomial $k(x)$ will have degree less than $d$, the error is however negligible for large field $F$.
 
-Second idea is to split a polynomial of degree less than $d$ into two polynomial of degree less than $d/2$. Using the first idea, this means in one step we have halved the number of queries. Consider the function $f$ defined above in step 0,
+The second idea is to split a polynomial of degree less than $d$ into two polynomials of degree less than $d/2$. Using the first idea, this means in one step we have halved the number of queries. Consider the function $f$ defined above in step 0,
 
 $$
 f_0(x) = a_0 + a_1x + a_2x^2 + ….+ a_dx^d
@@ -1082,7 +1082,7 @@ $$
 f_1(x) = g_0(x) + \alpha_0 h_0(x)
 $$
 
-where $f_1(x)$ is now of degree less than $d/2$ and is defined over $D' = \{x^2: x \in D \}$. Since at each step the degree is halved, repeating this step $\log_2(d)$ times gives us a final constant polynomial. In order to verify that the prover did not cheat, verifier queries $f_0(z)$ and $f_0(-z)$ at a random sample $z \in D$. Using these two evaluations, verifier can reproduce $g_o(z^2)$ and $h_0(z^2)$ since,
+where $f_1(x)$ is now of degree less than $d/2$ and is defined over $D' = \{x^2: x \in D \}$. Since at each step the degree is halved, repeating this step $\log_2(d)$ times gives us a final constant polynomial. In order to verify that the prover did not cheat, the verifier queries $f_0(z)$ and $f_0(-z)$ at a random sample $z \in D$. Using these two evaluations, the verifier can reproduce $g_o(z^2)$ and $h_0(z^2)$ since,
 
 $$
 g_0(x^2) = \frac {f_0(x) + f_o(-x)}{2}
@@ -1092,7 +1092,7 @@ $$
 h_0(x^2) = \frac {f_0(x) - f_0(-x)}{2x}
 $$
 
-Thus after logarithmic queries in the size of $d$, verifier can verify the low-degree claim of the polynomial $f(x)$ of degree less than $d$.
+Thus after logarithmic queries in the size of $d$, the verifier can verify the low-degree claim of the polynomial $f(x)$ of degree less than $d$.
 
 ## **5.4.4 FRI polynomial Commitment Scheme**
 
@@ -1106,9 +1106,9 @@ However, if the prover was cheating, then he won’t be able to prove that the q
 
 ## **5.4.5 Prover-Verifier Interaction**
 
-In the first step of proving the computation, the prover sends the commitments of trace polynomial, composition polynomial and intermediate polynomials of FRI protocol to the verifier. Composition polynomial is a random linear combinations of constraint (boundary and transition) polynomials. The commitments are Merkle root of the evaluation of polynomials in respective domains.
+In the first step of proving the computation, the prover sends the commitments of trace polynomial, composition polynomial, and intermediate polynomials of FRI protocol to the verifier. Composition polynomial is a random linear combination of constraint (boundary and transition) polynomials. The commitments are Merkle roots of the evaluation of polynomials in respective domains.
 
-In second step, the verifier makes some random queries. Prover sends the Merkle leafs (polynomial evaluations) and authentication paths against those queries to prove low-degree of polynomials. This interactive proof system is transformed into a non-interactive proof system through Fiat-Shamir transformation.
+In the second step, the verifier makes some random queries. The prover sends the Merkle leafs (polynomial evaluations) and authentication paths against those queries to prove low-degree of polynomials. This interactive proof system is transformed into a non-interactive proof system through Fiat-Shamir transformation.
 
 # **6 Conclusion**
 
